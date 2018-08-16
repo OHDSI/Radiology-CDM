@@ -1,0 +1,18 @@
+langauge: R
+cache: packages
+sudo: false
+
+r_packages: 
+  - devtools
+  - dplyr
+  - oro.dicom
+  - oro.nifti
+  - lambda.r
+  - rapportools
+  - papayar
+
+r_github_packages: 
+  - OHDSI/DatabaseConnector
+
+script:
+  - R CMD build .
