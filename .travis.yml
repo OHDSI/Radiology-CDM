@@ -1,6 +1,14 @@
-langauge: R
+langauge: c
 cache: packages
-sudo: false
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - r-base-dev
+
+script:
+  - R CMD build .
 
 r_packages: 
   - devtools
@@ -13,6 +21,3 @@ r_packages:
 
 r_github_packages: 
   - OHDSI/DatabaseConnector
-
-script:
-  - R CMD build .

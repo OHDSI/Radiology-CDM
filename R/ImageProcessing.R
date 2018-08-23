@@ -1,13 +1,62 @@
-# Resizing DICOM image,,
-# Using OpenRImage package,,
-resizeDICOM(imData, w, h) %as% resizeImage(image = dcmImg, width = w, height = h)
-
 # Package for Papayar Widgets
 # Connecting SQL Server,,
 # After connection, input want informations..
-showImages(con, Occurrence_ID, protocol_concept = NULL, Image_Type = NULL, phase_concept = NULL) %as% {
+showImages <- function(Occurrence_ID, protocol_concept = NULL, Image_Type = NULL, phase_concept = NULL) {
   # Required PixelData
   imgs <- readDCM(path = pathList, debug = TRUE, view = TRUE)
   nif <- dicom2nifti(imgs)
   papaya(nif)
+}
+
+# Integrated readDICOM Func...
+readDCM <- function(path, debug = FALSE, view = FALSE) {
+  if(view) {
+    files <- list.files(path = path, full.names = TRUE, include.dirs = FALSE, recursive = FALSE, pattern = "\\.dcm$")
+    count <- 0
+    nfiles <- length(files)
+    headers <- images <- vector("list", nfiles)
+    cat(" ", nfiles, "files to be processed by readDCM()", fill = TRUE)
+    tpb <- txtProgressBar(min = 0, max = nfiles, style = 3)
+    for(i in 1:nfiles) {
+      setTxtProgressBar(tpb, i)
+      tryCatch({
+        dcm <- readDICOM(path = files[i])
+        images[[i]] <- dcm$img
+        headers[[i]] <- dcm$hdr
+        count <- count + 1
+      }, error = function(e) {
+        errComment <- c("readDICOM func error: ", e)
+        print(Reduce(pasteNormal, errComment))
+      })
+    }
+    cat("\n", count, "read successes of", nfiles, "files", fill = TRUE)
+    close(tpb)
+    return(list(hdr = headers[sapply(headers, is.null)], img = images[sapply(images, is.null)]))
+  } else {
+    resImg <- tryCatch({
+      print(path)
+      readDICOM(path = path, verbose = debug)
+    }, error = function(e) {
+      errComment <- c("readDICOM func error: ", e)
+      errFile <- c("Change func readDICOMFile: ", path)
+
+      print(Reduce(pasteNormal, errComment))
+      print(Reduce(pasteNormal, errFile))
+
+      # Retry not parse pixelData function..
+      resImg <- readDICOMFile(fname = path, pixelData = FALSE)
+      assign("resImg", resImg, envir = .GlobalEnv)
+    })
+    return(resImg)
+  }
+}
+
+if(!require(lambda.r))
+  install.packages("lambda.r")
+library(lambda.r)
+
+# File is DICOM ?
+isDicom(file) %as% {
+  ext <- substr(file, nchar(file) - 2, nchar(file))
+  return(if(ext == 'dcm') TRUE else FALSE)
 }

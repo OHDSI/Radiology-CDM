@@ -14,10 +14,10 @@ The main functions include the Pre and Post identification algorithms of CT and 
 
 ## Require Package
 
-This package uses OHDSI's DatabaseConnector, oro.dicom package, and so on. In addition, some functions are implemented in Lambda, so you will also need the lambda.r package.
+This package uses OHDSI's DatabaseConnector, oro.dicom package, and so on. In addition, some functions are implemented in Lambda, so you will also need the lambda.r package. In addition, You should also include the R6 package using object-oriented programming techniques such as Java and the C # language.
 
 ```
-devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseConnector
+devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseConnector, R6
 ```
 
 
@@ -32,7 +32,14 @@ path <- "FILE_PATH"
 
 # Require savePathRoot
 savePathRoot <- "SAVEROOTPATH"
-dcmToRDS(path, savePathRoot, verbose = TRUE)
+
+# Create DcmFileModule
+DcmFm <- DcmFileModule$new(path, savePathRoot)
+
+# rootPathCount is A number from the beginning of the path 
+# to determine how many intervals to trim with delimiters.
+# verbose shows progress in detail.
+DcmFm$dcmToRDS(rootPathCount = 4, verbose = TRUE)
 ```
 
 Multiple folders are supported reliably.

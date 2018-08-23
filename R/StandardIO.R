@@ -50,10 +50,10 @@ trimData <- function(df) {
 }
 
 # Covert DateTime format
-getDateTime(date, time) %as% strptime(Reduce(pasteNormal, c(date, time)), format="%Y%m%d%H%M%OS")
+getDateTime <- function(date, time) strptime(Reduce(pasteNormal, c(date, time)), format="%Y%m%d%H%M%OS")
 
 # Convert Date format
-getDate(date) %as% as.Date(date, format="%Y%m%d")
+getDate <- function(date) as.Date(date, format="%Y%m%d")
 
 # Caculate during time..
-getDuringTime(before, after, units = "secs") %as% difftime(after, before, units = units)
+getDiffTime <- function(before, after, units = "secs") difftime(after, before, units = units)

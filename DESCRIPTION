@@ -1,9 +1,9 @@
 Package: DHEM
 Title: DICOM Header Extraction Modules (one line, title case)
 Version: 0.0.0.9000
-Authors@R: Neon K.I.D("First", "Last", email = "contact@neonkid.xyz", role = c("aut", "cre"))
+Authors@R: person("K.I.D", "Neon", email = "contact@neonkid.xyz", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
-Depends: R (>= 3.5.1)
+Depends: R (>= 3.4.4)
 License: GPL 3.0
 Encoding: UTF-8
 LazyData: true
