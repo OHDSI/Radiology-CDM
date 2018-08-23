@@ -1,4 +1,8 @@
 ################################ DBMSIO (include DatabaseConnector) Class #######################################
+if(!require(R6))
+  install.packages("R6")
+library(R6)
+
 DBMSIO <- R6Class(classname = "DBMSIO",
   private = list(
     con = NULL,

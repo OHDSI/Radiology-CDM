@@ -1,5 +1,5 @@
 ################################ DcmFileModule Class #############################################
-DcmFileModule <- R6Class(classname = "DcmFileModule",
+DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
   private = list(
     path = NULL,
     savePathRoot = NULL,
