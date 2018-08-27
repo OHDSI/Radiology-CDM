@@ -1,9 +1,9 @@
 # Package for Papayar Widgets
 # Connecting SQL Server,,
 # After connection, input want informations..
-showImages <- function(Occurrence_ID, protocol_concept = NULL, Image_Type = NULL, phase_concept = NULL) {
+showImages <- function(path, debug = FALSE) {
   # Required PixelData
-  imgs <- readDCM(path = pathList, debug = TRUE, view = TRUE)
+  imgs <- readDCM(path = path, debug = debug, view = TRUE)
   nif <- dicom2nifti(imgs)
   papaya(nif)
 }
