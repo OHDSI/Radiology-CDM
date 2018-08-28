@@ -57,3 +57,13 @@ getDate <- function(date) as.Date(date, format="%Y%m%d")
 
 # Caculate during time..
 getDiffTime <- function(before, after, units = "secs") difftime(after, before, units = units)
+
+# Prefix + filePath
+combinePath <- function(prefix, path) {
+  if(is.vector(path)) {
+    newList <- list()
+    for(i in 1:length(path))
+      newList[i] <- Reduce(pastePath, c(prefix, path[i]))
+    return(newList)
+  } else return(Reduce(pastePath, c(prefix, list)))
+}

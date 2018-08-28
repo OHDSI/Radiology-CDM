@@ -46,6 +46,12 @@ DBMSIO <- R6Class(classname = "DBMSIO",
         return(querySql(connection = private$con, sql = paste0("SELECT * FROM ", tb, " WHERE ", condition)))
     },
 
+    searchUseSQLAdvanced = function(dbS, tbS, condition, count) {
+      dbSchema <- c(dbS, tbS)
+      tb <- Reduce(pasteSQL, dbSchema)
+      return(querySql(connection = private$con, sql = paste0("SELECT TOP(", count, ") * FROM ", tb, " WHERE ", condition, ";")))
+    },
+
     # 4th val is concept_id, 5th image_Type
     searchForImg = function(occur_id){
       dbSchema <- 'Radiology_CDM.dbo'

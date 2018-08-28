@@ -3,7 +3,7 @@
 # After connection, input want informations..
 showImages <- function(path, debug = FALSE) {
   # Required PixelData
-  imgs <- readDCM(path = path, debug = debug, view = TRUE)
+  imgs <- readDICOM(path = path, verbose = debug)
   nif <- dicom2nifti(imgs)
   papaya(nif)
 }
@@ -11,14 +11,21 @@ showImages <- function(path, debug = FALSE) {
 # Integrated readDICOM Func...
 readDCM <- function(path, debug = FALSE, view = FALSE) {
   if(view) {
-    files <- list.files(path = path, full.names = TRUE, include.dirs = FALSE, recursive = FALSE, pattern = "\\.dcm$")
+    if(is.list(path))
+      files <- as.character(path)
+    else if(is.vector(path))
+      files <- path
+    else
+      files <- list.files(path = path, full.names = TRUE, include.dirs = FALSE, recursive = FALSE, pattern = "\\.dcm$")
     count <- 0
     nfiles <- length(files)
     headers <- images <- vector("list", nfiles)
-    cat(" ", nfiles, "files to be processed by readDCM()", fill = TRUE)
-    tpb <- txtProgressBar(min = 0, max = nfiles, style = 3)
+    if(debug) {
+      cat(" ", nfiles, "files to be processed by readDCM()", fill = TRUE)
+      tpb <- txtProgressBar(min = 0, max = nfiles, style = 3)
+    }
     for(i in 1:nfiles) {
-      setTxtProgressBar(tpb, i)
+      if(debug) setTxtProgressBar(tpb, i)
       tryCatch({
         dcm <- readDICOM(path = files[i])
         images[[i]] <- dcm$img
@@ -30,8 +37,8 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
       })
     }
     cat("\n", count, "read successes of", nfiles, "files", fill = TRUE)
-    close(tpb)
-    return(list(hdr = headers[sapply(headers, is.null)], img = images[sapply(images, is.null)]))
+    if(debug) close(tpb)
+    return(list(hdr = headers, img = images))
   } else {
     resImg <- tryCatch({
       print(path)
