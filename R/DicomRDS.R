@@ -3,6 +3,7 @@ if(!require(R6))
   install.packages("R6")
 library(R6)
 
+#' @export
 DicomRDS <- R6Class(classname = "DicomRDS",
   private = list(
     # Parameter name is TagName

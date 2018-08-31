@@ -1,6 +1,7 @@
 # Package for Papayar Widgets
 # Connecting SQL Server,,
 # After connection, input want informations..
+#' @export
 showImages <- function(path, debug = FALSE) {
   # Required PixelData
   imgs <- readDICOM(path = path, verbose = debug)
@@ -9,6 +10,7 @@ showImages <- function(path, debug = FALSE) {
 }
 
 # Integrated readDICOM Func...
+#' @export
 readDCM <- function(path, debug = FALSE, view = FALSE) {
   if(view) {
     if(is.list(path))

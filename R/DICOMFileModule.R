@@ -1,4 +1,5 @@
 ################################ DcmFileModule Class #############################################
+#' @export
 DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
   private = list(
     path = NULL,
