@@ -1,10 +1,18 @@
 ################################ DBMSIO (include DatabaseConnector) Class #######################################
-if(!require(R6))
-  install.packages("R6")
-library(R6)
-
+#' DBMSIO Class
+#'
+#' This class is a DBMS I/O class created using the DatabaseConnector package.
+#'
+#' @param server Enter the server address to access
+#' @param user Enter the user ID of the DBMS you want to access
+#' @param pw Enter the password for the DBMS you want to access.
+#' @param dbms Enter the DBMS type. ex: sql server, oracle
+#'
+#' @usage DBMSIO$new(server, user, pw, dbms, port)
+#' @example Examples/DBMSio_Ex.R
+#' @author Neon K.I.D
 #' @export
-DBMSIO <- R6Class(classname = "DBMSIO",
+DBMSIO <- R6::R6Class(classname = "DBMSIO",
   private = list(
     con = NULL,
 

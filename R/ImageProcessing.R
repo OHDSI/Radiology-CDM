@@ -1,16 +1,4 @@
-# Package for Papayar Widgets
-# Connecting SQL Server,,
-# After connection, input want informations..
-#' @export
-showImages <- function(path, debug = FALSE) {
-  # Required PixelData
-  imgs <- readDICOM(path = path, verbose = debug)
-  nif <- dicom2nifti(imgs)
-  papaya(nif)
-}
-
 # Integrated readDICOM Func...
-#' @export
 readDCM <- function(path, debug = FALSE, view = FALSE) {
   if(view) {
     if(is.list(path))
@@ -43,8 +31,8 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
     return(list(hdr = headers, img = images))
   } else {
     resImg <- tryCatch({
-      print(path)
-      readDICOM(path = path, verbose = debug)
+      # print(path)
+      resImg <- readDICOM(path = path, verbose = debug)
     }, error = function(e) {
       errComment <- c("readDICOM func error: ", e)
       errFile <- c("Change func readDICOMFile: ", path)
@@ -54,18 +42,8 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
 
       # Retry not parse pixelData function..
       resImg <- readDICOMFile(fname = path, pixelData = FALSE)
-      assign("resImg", resImg, envir = .GlobalEnv)
+      # assign("resImg", resImg, envir = .GlobalEnv)
     })
     return(resImg)
   }
-}
-
-if(!require(lambda.r))
-  install.packages("lambda.r")
-library(lambda.r)
-
-# File is DICOM ?
-isDicom(file) %as% {
-  ext <- substr(file, nchar(file) - 2, nchar(file))
-  return(if(ext == 'dcm') TRUE else FALSE)
 }

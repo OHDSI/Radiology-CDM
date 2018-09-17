@@ -22,38 +22,18 @@ devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseC
 
 
 
-## Example
+## Extraction sequence
 
-Function to convert dcm file to RDS
-
-```R
-# Image FilePath
-path <- "FILE_PATH"
-
-# Require savePathRoot
-savePathRoot <- "SAVEROOTPATH"
-
-# Create DcmFileModule
-DcmFm <- DcmFileModule$new(path, savePathRoot)
-
-# rootPathCount is A number from the beginning of the path 
-# to determine how many intervals to trim with delimiters.
-# verbose shows progress in detail.
-DcmFm$dcmToRDS(rootPathCount = 4, verbose = TRUE)
-```
-
-Multiple folders are supported reliably.
+1. Use the DcmFileModule class to extract metadata from a DICOM image file into an RDS file
+2. Read the extracted metadata RDS file and load it into the DBMS using the Radiology CDM generation function. (Using the DBMSIO class and the createRadiology family function)
 
 
+
+## Example / Documentation
+
+Documents and examples in the DicomHeaderExtractionModule package can be loaded into the class and function names you want to provide the document using the question mark keyword after package installation.
 
 ```R
-# RDS filePath
-path <- "FILE_PATH"
-
-# Read for data frame...
-df <- readRDS("FILE_PATH")
+?DBMSIO
 ```
 
-The stored RDS file can be easily moved to the data frame using the readRDS function.
-
-See the Example.R file for a more detailed example.

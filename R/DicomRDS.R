@@ -1,10 +1,16 @@
 #################################### DicomRDS Class #############################################
-if(!require(R6))
-  install.packages("R6")
-library(R6)
-
+#' DicomRDS Class
+#'
+#' This class is a class that imports various metadata by reading an RDS file containing DICOM information.
+#' There are basically functions that import data related to Radiology CDM.
+#'
+#' @param data Data frame imported from DICOM RDS file
+#' @seealso https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+#' @usage DicomRDS$new(data)
+#' @author Neon K.I.D
+#' @example Examples/DicomRDS_Ex.R
 #' @export
-DicomRDS <- R6Class(classname = "DicomRDS",
+DicomRDS <- R6::R6Class(classname = "DicomRDS",
   private = list(
     # Parameter name is TagName
     # Parameter data is RDS Data...
@@ -12,9 +18,9 @@ DicomRDS <- R6Class(classname = "DicomRDS",
       tryCatch({
         res <- self$data$value[which(ifelse(self$data$name %in% name, TRUE, FALSE))]
         if(is.empty(x = res))
-          res <- ''
+          res <- NA
       }, error = function(e) {
-        res <- ''
+        res <- NA
         assign("res", res, envir = .GlobalEnv)
       })
       return(res)
@@ -46,10 +52,32 @@ DicomRDS <- R6Class(classname = "DicomRDS",
 
     # Creation Radiology ID
     createOccurrenceID = function() {
-      seriesID <- private$getTagValue("SeriesInstanceUID")
-      studyID <- private$getTagValue("StudyID")
+      seriesID <- unlist(strsplit(x = private$getTagValue("SeriesInstanceUID"), split = '[.]'))
+      studyTime <- unlist(strsplit(x = private$getTagValue("StudyTime"), split = '[.]'))
 
-      return(Reduce(pasteSQL, c(seriesID, studyID)))
+      x <- seriesID[length(seriesID)]
+      y <- as.numeric(
+        substr(x = studyTime[1], start = nchar(studyTime[1]) - 4, stop = nchar(studyTime[1]))
+      )
+
+      directoryID <- self$getDirectoryID()
+      i <- as.numeric(directoryID)
+      z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
+
+      # Numbering...
+      if(nchar(x) > 7)
+        x <- as.numeric(substr(x = x, start = nchar(x) - 5, stop = nchar(x)))
+      else
+        x <- as.numeric(x)
+
+      max.val <- i + abs(y - nchar(trunc(x)) - x)
+      count <- nchar(trunc(max.val))
+
+      size <- paste("%0", count, "d", sep = "")
+      set.seed(i)
+      # lets <- toupper(sample(letters,x, replace = TRUE))
+      nums <- sprintf(size, sample(1:max.val)[1:nchar(trunc(z))])
+      return(paste(nums, sep = ""))
     },
 
     getStudyDate = function() return(private$getTagValue("StudyDate")),
@@ -73,7 +101,7 @@ DicomRDS <- R6Class(classname = "DicomRDS",
           return(duringTime)
         }
       }, error = function(e) {
-        return('')
+        return(NA)
       })
     },
 
@@ -91,11 +119,17 @@ DicomRDS <- R6Class(classname = "DicomRDS",
     getDosageunit = function(modality) if(equals(modality, "MRI")) return("Tesla") else return("kVp"),
     getDosage = function(dosageUnit) {
       sha = private$getTagValue(dosageUnit)
-      if(is.empty(sha)) return('') else return(sha)
+      if(is.empty(sha)) return(NA) else return(sha)
     },
 
     getSourceID = function() return(private$getTagValue("SOPInstanceUID")),
     getPersonID = function() return(private$getTagValue("PatientID")),
+    getStudyID = function() return(private$getTagVAlue("StudyID")),
+    getDirectoryID = function() {
+      sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
+      shortPath <- tail(x = unlist(sp), -2)
+      return(str_extract(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
+    },
     getImageType = function() {
       exType <- private$getTagValue("ImageType")
       if(!is.na(exType)) {
@@ -125,68 +159,3 @@ DicomRDS <- R6Class(classname = "DicomRDS",
     finalize = function() {}
   )
 )
-
-# Available multiple RDS file
-# maybe seems to parallel processing...
-getCommonHdr <- function(path, verbose = FALSE) {
-  fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE)
-  print(Reduce(pasteNormal, c("Common Header Extracting: ", path)))
-  pb <- if(verbose) txtProgressBar(min = 0, max = length(fileList), style = 3, width = 100)
-
-  for(k in 1:length(fileList)) {
-    data <- readRDS(file = fileList[k])
-    minor <- c()
-
-    for(i in 1:length(data)) {
-      # only tag name
-      tagList <- unique(data[[i]]$name)
-      minor <- c(minor, tagList)
-    }
-
-    if(verbose) setTxtProgressBar(pb = pb, value = k)
-  }
-  if(verbose) close(pb)
-  return(unique(minor))
-}
-
-# Count list is Data frame...
-getHdrcountFrame <- function(path, verbose = FALSE) {
-  tagName <- getCommonHdr(path, verbose = verbose)
-  tagCount <- rep(1, length(tagName))
-
-  # Common TagList
-  frame <- data.frame(tagName, tagCount)
-  fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE)
-
-  print(Reduce(pasteNormal, c("Common Header Counting: ", path)))
-  pb <- if(verbose) txtProgressBar(min = 0, max = length(fileList), style = 3, width = 100)
-
-  # Dicom total Count
-  dCount <- 0
-
-  for(k in 1:length(fileList)) {
-    # One RDS File Read... (in multi dicom files)
-    data <- readRDS(file = fileList[k])
-    dCount <- dCount + length(data)
-
-    # File Loop,,
-    for(d in 1:length(data)) {
-      if(!is.null(data[[d]])) {
-        name <- data[[d]]$name
-        value <- data[[d]]$value
-
-        # Only one dicom file tag list
-        for(f in 1:length(frame$tagName)) {
-          tName <- frame$tagName[f]
-          tCount <- frame$tagCount[f]
-
-          ifelse(name %in% tName, frame$tagCount[f] <- tCount + 1, NA)
-        }
-      }
-    }
-    if(verbose) setTxtProgressBar(pb = pb, value = k)
-  }
-  if(verbose) close(pb)
-  print(Reduce(pasteNormal, c("DICOM file total Count: ", dCount)))
-  return(frame)
-}

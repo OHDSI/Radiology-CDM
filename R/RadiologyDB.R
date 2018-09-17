@@ -1,65 +1,35 @@
-################################ Function Zone #############################################
-
-# Finish Schema,,
-# but foriegn key is temporary dicom image metadata,,
+#'createRadiologyOccurrence
+#'
+#'This function creates the Occurrence table based on Radiology CDM.
+#'You need to create an Occurrence table based on Radiology CDM in your DBMS as a preliminary work,
+#'and if there is no table in advance, it will output an error.
+#'
+#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+#'@usage createRadiologyOccurrence(path)
+#'@example Examples/createRadiologyOccurrence_Ex.R
+#'@param path Enter the folder of radiation data to be extracted.
+#'@author Neon K.I.D
+#'@export
 createRadiologyOccurrence <- function(path) {
-  fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE)
+  fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE, pattern = "\\.rds$")
 
-  # radiology process 의 고유식별자(기본키)
   radiology_occurrence_ID <- c()
-
-  # 이미지데이터의촬영날짜
   radiology_occurrence_date <- c(as.Date(NA))
-
-  # 이미지데이터의촬영날짜및시각
   radiology_occurrence_datetime <- c(as.POSIXct(rep(NA)))
-
-  # CDM내에정의된익명화된환자의ID(FK)
   Person_ID <- c()
-
-  # Condition_occurrence table의 FK
   Condition_occurrence_id <- c()
-
-  # CDM 내에서정의된이미지촬영장치의ID(FK)
   Device_concept_id <- c()
-
-  # image modality (CT, X-ray, MRI, PET-CT) 정보
   radiology_modality_concept_ID <- c()
-
-  # PA, AP, supine 등 person position 에 대한 정보
-  # http://dicom.nema.org/medical/dicom/current/output/html/figures/PS3.3_C.7.3.1.1.2-1.svg)
-  # DICOM file 의 patient orientation으로 부터
-  # https://www.dabsoft.ch/dicom/3/C.7.6.1.1.1/)
   Person_orientation_concept_id <- c()
-
-  # Image process (Brain Angio CT? Chest PA ? non-contrast brain CT?) 등image process에대한정보
   radiology_protocol_concept_id <- c()
-
-  # 환자에게서수집되어진이미지수 전체
   Image_total_count <- c()
-
-  # 환자 촬영 부위
   Anatomic_site_concept_id <- c()
-
-  # 이미지에대한사용자정의주석
   radiology_Comment <- c()
-
-  # image dosage 의unit (eg CT, X-ray는KVp, MRI의경우Tesla)
   Image_dosage_unit_concept_id <- c()
-
-  # 도즈량(사용된x선발생기의Peak Kilo전압출력량 / MRI의 경우 1.5? 3T?)
   Dosage_value_as_number <- c()
-
-  # 노출시간(eg msec, min)에대한단위정보
   Image_exposure_time_unit_concept_id <- c()
-
-  # X 선, CT, MRI노출시간
   Image_exposure_time <- c()
-
-  # 해당이미지데이터가저장된'폴더'경로에대한id (이ID별로의파일경로는따로보관)
   Radiology_dirpath <- c()
-
-  # visit_occurrence_id (FK)
   Visit_occurrence_id <- c()
 
   # Explore FileList
@@ -72,12 +42,10 @@ createRadiologyOccurrence <- function(path) {
         dcmRDS <- DicomRDS$new(data[[i]])
 
         # Dirpath Settings
-        sp <- strsplit(as.character(data[[i]]$path[i]), '/')
-        headPath <- head(unlist(sp), -1)
-
-        # sp <- strsplit(as.character(data[[i]]$path[length(data[[i]]$path)]), '/')
-        shortPath <- tail(headPath, -4)
-        rDirPath <- Reduce(pastePath, shortPath)
+        # Temp code, if source code open, please modify...
+        sp <- strsplit(as.character(data[[i]]$path[1]), '/')
+        rDirPath <- head(unlist(sp), -1)
+        rDirPath <- Reduce(pastePath, rDirPath)
 
         roID <- dcmRDS$createOccurrenceID()
         if(num == 1) {
@@ -93,7 +61,8 @@ createRadiologyOccurrence <- function(path) {
           }
         }
 
-        pID <- dcmRDS$getPatientID()
+        #pID <- dcmRDS$getPatientID()
+        pID <- dcmRDS$getDirectoryID()
         coID <- 0
         dcID <- dcmRDS$getDeviceID()
         modality <- dcmRDS$getModality()
@@ -168,14 +137,24 @@ createRadiologyOccurrence <- function(path) {
     Image_exposure_time,
     Radiology_dirpath,
     Visit_occurrence_id,
+    ASPECTS,
     stringsAsFactors = FALSE
   )
   return(Radiology_occurrence)
 }
 
+#'createRadiologyImage
+#'
+#'This function creates the Image table based on Radiology CDM.
+#'You need to create an Occurrence table based on Radiology CDM in your DBMS as a preliminary work,
+#'and if there is no table in advance, it will output an error.
+#'
+#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+#'@param data Data frame containing image information
+#'@example Examples/createRadiologyImage_Ex.R
+#'@author Neon K.I.D
+#'@export
 createRadiologyImage <- function(data) {
-  # Only One RDS File
-  Source_ID <- c()
   Radiology_occurrence_ID <- c()
   Person_ID <- c()
   Person_orientation_concept_id <- c()
@@ -202,9 +181,7 @@ createRadiologyImage <- function(data) {
   for(i in 1:length(data)) {
     if(!is.null(data[[i]])) {
       dcmRDS <- DicomRDS$new(data[[i]])
-
-      Source_ID[num] <- dcmRDS$getSourceID()
-      Person_ID[num] <- dcmRDS$getPatientID()
+      Person_ID[num] <- dcmRDS$getDirectoryID()
 
       # PatientPosition is null .... blank
       pocID <- dcmRDS$getOrientation()
@@ -258,20 +235,14 @@ createRadiologyImage <- function(data) {
       Image_slice_thickness[num] <- if(is.empty(thickness) || num == 1) '' else thickness
       Image_type[num] <- imType
       Person_orientation_concept_id[num] <- pocID
+      image_filepath[num] <- as.character(data[[i]]$path[1])
 
-      # Dirpath Settings
-      sp <- strsplit(as.character(data[[i]]$path[length(data[[i]]$path)]), '/')
-      shortPath <- tail(x = unlist(sp), -4)
-      filePath <- Reduce(pastePath, shortPath)
-
-      image_filepath[num] <- filePath
       num <- num + 1
       pNum <- pNum + 1
     }
   }
 
   Radiology_Image <- data.frame(
-    Source_ID,
     Radiology_occurrence_ID,
     Person_ID,
     Person_orientation_concept_id,
@@ -284,7 +255,8 @@ createRadiologyImage <- function(data) {
     Image_Window_Level_Center,
     Image_Window_Level_Width,
     Image_slice_thickness,
-    image_filepath
+    image_filepath,
+    stringsAsFactors = FALSE
   )
   return(Radiology_Image)
 }

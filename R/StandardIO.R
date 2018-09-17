@@ -35,20 +35,6 @@ equals <- function(str1, str2) {
   else if(pmatch(str1, str2, nomatch = FALSE) == 1) TRUE else FALSE
 }
 
-# Data Frame searching na Data,
-# and deleta na Data..
-trimData <- function(df) {
-  tmp <- na.omit(df)
-  fin <- tryCatch({
-    tmp[tmp$length > 0,]
-  },
-  error = function(e){
-    print(e)
-    fin <- tmp
-  })
-  return(fin)
-}
-
 # Covert DateTime format
 getDateTime <- function(date, time) strptime(Reduce(pasteNormal, c(date, time)), format="%Y%m%d%H%M%OS")
 
@@ -56,7 +42,10 @@ getDateTime <- function(date, time) strptime(Reduce(pasteNormal, c(date, time)),
 getDate <- function(date) as.Date(date, format="%Y%m%d")
 
 # Caculate during time..
-getDiffTime <- function(before, after, units = "secs") difftime(after, before, units = units)
+getDiffTime <- function(before, after, units = "secs") {
+  options(digits = 3)
+  difftime(after, before, units = units)
+}
 
 # Prefix + filePath
 combinePath <- function(prefix, path) {
