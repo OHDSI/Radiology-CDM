@@ -160,7 +160,7 @@ createRadiologyOccurrence <- function(path) {
 createRadiologyImage <- function(data) {
   Radiology_occurrence_ID <- c()
   Person_ID <- c()
-  Person_orientation_concept_id <- c()
+  Person_orientation_concept <- c()
   Image_type <- c()
   radiology_phase_concept_id <- c()
   Image_no <- c()
@@ -237,7 +237,7 @@ createRadiologyImage <- function(data) {
       Image_Window_Level_Width[num] <- dcmRDS$getWindowWidth()
       Image_slice_thickness[num] <- if(is.empty(thickness) || num == 1) '' else thickness
       Image_type[num] <- imType
-      Person_orientation_concept_id[num] <- pocID
+      Person_orientation_concept[num] <- pocID
       image_filepath[num] <- as.character(data[[i]]$path[1])
 
       num <- num + 1
@@ -248,7 +248,7 @@ createRadiologyImage <- function(data) {
   Radiology_Image <- data.frame(
     Radiology_occurrence_ID,
     Person_ID,
-    Person_orientation_concept_id,
+    Person_orientation_concept,
     Image_type,
     radiology_phase_concept_id,
     Image_no,

@@ -1,5 +1,5 @@
-Package: DHEM
-Title: DICOM Header Extraction Modules (one line, title case)
+Package: RadETL
+Title: Radiology CDM ETL Module (one line, title case)
 Version: 1.0
 Authors@R: person("K.I.D", "Neon", email = "contact@neonkid.xyz", role = c("aut", "cre"))
 Description: Dicom Header Extraction Package.

@@ -22,6 +22,14 @@ devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseC
 
 
 
+## How to install
+
+```R
+install_github("NEONKID/RCDM-ETL")
+```
+
+
+
 ## Extraction sequence
 
 1. Use the DcmFileModule class to extract metadata from a DICOM image file into an RDS file
