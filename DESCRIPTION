@@ -1,6 +1,6 @@
 Package: DHEM
 Title: DICOM Header Extraction Modules (one line, title case)
-Version: 0.1
+Version: 1.0
 Authors@R: person("K.I.D", "Neon", email = "contact@neonkid.xyz", role = c("aut", "cre"))
 Description: Dicom Header Extraction Package.
 Depends: 
