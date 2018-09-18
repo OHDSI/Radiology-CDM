@@ -1,4 +1,4 @@
-# DicomHeaderExtractionModule
+# Radiology CDM ETL Module
 
 [![Build Status](https://travis-ci.com/NEONKID/DicomHeaderExtractionModule.svg?token=KX1jEf9MwMRzGiDnba2h&branch=master)](https://travis-ci.com/NEONKID/DicomHeaderExtractionModule)
 
