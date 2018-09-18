@@ -20,14 +20,15 @@ createRadiologyOccurrence <- function(path) {
   Condition_occurrence_id <- c()
   Device_concept_id <- c()
   radiology_modality_concept_ID <- c()
-  Person_orientation_concept_id <- c()
+  Person_orientation_concept <- c()
+  Person_position_concept <- c()
   radiology_protocol_concept_id <- c()
   Image_total_count <- c()
   Anatomic_site_concept_id <- c()
   radiology_Comment <- c()
-  Image_dosage_unit_concept_id <- c()
+  Image_dosage_unit_concept <- c()
   Dosage_value_as_number <- c()
-  Image_exposure_time_unit_concept_id <- c()
+  Image_exposure_time_unit_concept <- c()
   Image_exposure_time <- c()
   Radiology_dirpath <- c()
   Visit_occurrence_id <- c()
@@ -66,7 +67,8 @@ createRadiologyOccurrence <- function(path) {
         coID <- 0
         dcID <- dcmRDS$getDeviceID()
         modality <- dcmRDS$getModality()
-        pocID <- dcmRDS$getOrientation()
+        pocID <- dcmRDS$getPosition()
+        oriID <- dcmRDS$getOrientation()
 
         # Contrast Information,,
         # TRUE = Post image
@@ -101,16 +103,17 @@ createRadiologyOccurrence <- function(path) {
     Device_concept_id[f] <- dcID
 
     radiology_modality_concept_ID[f] <- modality
-    Person_orientation_concept_id[f] <- pocID
+    Person_position_concept[f] <- pocID
+    Person_orientation_concept[f] <- oriID
     radiology_protocol_concept_id[f] <- rpcID
 
     Image_total_count[f] <- tCount
     Anatomic_site_concept_id[f] <- ascID
     radiology_Comment[f] <- imgComment
 
-    Image_dosage_unit_concept_id[f] <- dosage
+    Image_dosage_unit_concept[f] <- dosage
     Dosage_value_as_number[f] <- dosageNum
-    Image_exposure_time_unit_concept_id[f] <- timeUnit
+    Image_exposure_time_unit_concept[f] <- timeUnit
 
     Image_exposure_time[f] <- duringTime
     Radiology_dirpath[f] <- rDirPath
@@ -120,24 +123,24 @@ createRadiologyOccurrence <- function(path) {
   # Final Data Model
   Radiology_occurrence <- data.frame(
     radiology_occurrence_ID,
-    radiology_occurrence_date,
+    Radiology_occurrence_date,
     radiology_occurrence_datetime,
     Person_ID,
     Condition_occurrence_id,
     Device_concept_id,
     radiology_modality_concept_ID,
-    Person_orientation_concept_id,
+    Person_orientation_concept,
+    Person_position_concept,
     radiology_protocol_concept_id,
     Image_total_count,
     Anatomic_site_concept_id,
     radiology_Comment,
-    Image_dosage_unit_concept_id,
+    Image_dosage_unit_concept,
     Dosage_value_as_number,
-    Image_exposure_time_unit_concept_id,
+    Image_exposure_time_unit_concept,
     Image_exposure_time,
     Radiology_dirpath,
     Visit_occurrence_id,
-    ASPECTS,
     stringsAsFactors = FALSE
   )
   return(Radiology_occurrence)
@@ -171,12 +174,12 @@ createRadiologyImage <- function(data) {
 
   num <- 1
   pNum <- 1
-  rID <- ''
+  rID <- NA
   reNum <- 1
 
   # Current imageType, radiology_phase_concept_id
-  curimType <- ''
-  curPCID <- ''
+  curimType <- NA
+  curPCID <- NA
 
   for(i in 1:length(data)) {
     if(!is.null(data[[i]])) {

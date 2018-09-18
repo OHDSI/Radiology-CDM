@@ -25,7 +25,43 @@ devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseC
 ## Extraction sequence
 
 1. Use the DcmFileModule class to extract metadata from a DICOM image file into an RDS file
-2. Read the extracted metadata RDS file and load it into the DBMS using the Radiology CDM generation function. (Using the DBMSIO class and the createRadiology family function)
+
+   ```R
+   # Example
+   DFM <- DcmFileModule$new(path, savePathRoot)
+   DFM$dcmToRDS(rootPathCount = 4, verbose = FALSE)
+   ```
+
+2. Read the extracted metadata RDS file using the Radiology CDM generation function. 
+   (Using createRadiology family function)
+
+   ```R
+   # Example 
+   path <- "/home/ohdsi/dicom.rds"
+   
+   # Create Data frame for Radiology Occurrence Table (based on Radiology CDM)
+   df <- createRadiologyOccurrence(path)
+   
+   # Create Data frame Radiology Image Table (based on Radiology CDM)
+   df <- createRadiologyImage(data = readRDS(path))
+   ```
+
+3. Loads data from the RDS file into the RDBMS. 
+   (Using DBMSIO Class)
+
+   ```R
+   # Example
+   dbms <- "sql server"
+   user <- Sys.getenv("user")
+   pw <- Sys.getenv("pw")
+   server <- Sys.getenv("dbServer")
+   
+   # Connect DBMS...
+   db <- DBMSIO$new(server = server, user = user, pw = pw, dbms = dbms)
+   
+   # df is radiology Data frame,,
+   db$insertDB(dbS = databaseSchema, tbS = tbSchema, df = df)
+   ```
 
 
 

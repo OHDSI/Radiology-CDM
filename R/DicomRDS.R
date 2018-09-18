@@ -108,12 +108,8 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getPatientID = function() return(private$getTagValue("PatientID")),
     getDeviceID = function() return(private$getTagValue("DeviceSerialNumber")),
     getModality = function() return(private$getTagValue("Modality")),
-    getOrientation = function() {
-      pocID <- private$getTagValue("PatientPosition")
-      if(is.empty(pocID))
-        pocID <- private$getTagValue("PatientOrientation")
-      return(pocID)
-    },
+    getOrientation = function() return(private$getTagValue("PatientOrientation")),
+    getPosition = function() return(private$getTagValue("PatientPosition")),
 
     getComment = function() return(private$getTagValue("ImageComments")),
     getDosageunit = function(modality) if(equals(modality, "MRI")) return("Tesla") else return("kVp"),
