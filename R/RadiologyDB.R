@@ -4,7 +4,7 @@
 #'You need to create an Occurrence table based on Radiology CDM in your DBMS as a preliminary work,
 #'and if there is no table in advance, it will output an error.
 #'
-#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/RCDM-ETL/wiki
 #'@usage createRadiologyOccurrence(path)
 #'@example Examples/createRadiologyOccurrence_Ex.R
 #'@param path Enter the folder of radiation data to be extracted.
@@ -152,7 +152,7 @@ createRadiologyOccurrence <- function(path) {
 #'You need to create an Occurrence table based on Radiology CDM in your DBMS as a preliminary work,
 #'and if there is no table in advance, it will output an error.
 #'
-#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+#'@seealso Radiology CDM Wiki: https://github.com/NEONKID/RCDM-ETL/wiki
 #'@param data Data frame containing image information
 #'@example Examples/createRadiologyImage_Ex.R
 #'@author Neon K.I.D
@@ -197,10 +197,8 @@ createRadiologyImage <- function(data) {
       # TRUE = Post. Additional, Color format is RGB that 3D IMAGE FORMAT..
       # FALSE = Pre
       rpcID <- "Pre"
-      if(dcmRDS$isPost4BrainCT()) {
-        if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED"
-        else rpcID <- "Post"
-      }
+      if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED"
+      else if(dcmRDS$isPost4BrainCT()) rpcID <- "Post"
 
       radiology_phase_concept_id[num] <- rpcID
       thickness <- dcmRDS$getThickness()
