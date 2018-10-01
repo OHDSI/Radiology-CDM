@@ -1,6 +1,6 @@
 # Radiology CDM ETL Module
 
-[![Build Status](https://travis-ci.com/NEONKID/DicomHeaderExtractionModule.svg?token=KX1jEf9MwMRzGiDnba2h&branch=master)](https://travis-ci.com/NEONKID/DicomHeaderExtractionModule)
+[![Build Status](https://travis-ci.org/NEONKID/RCDM-ETL.svg?branch=master)](https://travis-ci.org/NEONKID/RCDM-ETL)
 
 
 
@@ -17,7 +17,7 @@ The main functions include the Pre and Post identification algorithms of CT and 
 This package uses OHDSI's DatabaseConnector, oro.dicom package, and so on. In addition, some functions are implemented in Lambda, so you will also need the lambda.r package. In addition, You should also include the R6 package using object-oriented programming techniques such as Java and the C# language.
 
 ```
-devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseConnector, R6
+devtools, dplyr, oro.dicom, lambda.r, rapportools, papayar, oro.nifti, DatabaseConnector, SqlRender, R6
 ```
 
 
@@ -69,6 +69,7 @@ install_github("NEONKID/RCDM-ETL")
    
    # df is radiology Data frame,,
    db$insertDB(dbS = databaseSchema, tbS = tbSchema, df = df)
+   db$finalize()
    ```
 
 
