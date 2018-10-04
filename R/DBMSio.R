@@ -15,6 +15,7 @@
 DBMSIO <- R6::R6Class(classname = "DBMSIO",
   private = list(
     con = NULL,
+    dbms = NULL,
 
     # Using DatabaseConnector for OHDSI (included JDBC)
     connectDBMS = function(server, user, pw, dbms, port) {
@@ -24,6 +25,12 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server)
       con <- connect(connectionDetails = sql)
       return(con)
+    },
+
+    convertSql = function(query, dbS) {
+      sql <- renderSql(sql = query, dbS)
+      sql <- translateSql(sql = sql, targetDialect = private$dbms)
+      return(sql)
     }
   ),
 
@@ -33,6 +40,12 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       if(!require(DatabaseConnector))
         install.packages("DatabaseConnector")
       library(DatabaseConnector)
+
+      if(!require(SqlRender))
+        install.packages("SqlRender")
+      library(SqlRender)
+
+      private$dbms <- dbms
       private$con <- private$connectDBMS(server, user, pw, dbms, port)
     },
 
@@ -42,7 +55,8 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       dbSchema <- c(dbS, tbS)
       tb <- Reduce(pasteSQL, dbSchema)
       val <- paste0(apply(df, 1, function(x) paste0("('", paste0(x, collapse = "', '"), "')")), collapse = ", ")
-      dbSendStatement(private$con, paste0("INSERT INTO ",tb," VALUES ", val))
+      sql <- paste0("INSERT INTO ",tb," VALUES ", val)
+      dbSendStatement(private$con, sql)
     },
 
     # Using SQL for RDBMS...
@@ -50,15 +64,10 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       dbSchema <- c(dbS, tbS)
       tb <- Reduce(pasteSQL, dbSchema)
       if(is.null(condition))
-        return(querySql(connection = private$con, sql = paste0("SELECT * FROM ", tb)))
+        sql <- paste0("SELECT * FROM ", tb)
       else
-        return(querySql(connection = private$con, sql = paste0("SELECT * FROM ", tb, " WHERE ", condition)))
-    },
-
-    searchUseSQLAdvanced = function(dbS, tbS, condition, count) {
-      dbSchema <- c(dbS, tbS)
-      tb <- Reduce(pasteSQL, dbSchema)
-      return(querySql(connection = private$con, sql = paste0("SELECT TOP(", count, ") * FROM ", tb, " WHERE ", condition, ";")))
+        sql <- paste0("SELECT * FROM ", tb, " WHERE ", condition)
+      return(querySql(connection = private$con, sql = private$convertSql(query = sql, dbS = dbS)))
     },
 
     # 4th val is concept_id, 5th image_Type
