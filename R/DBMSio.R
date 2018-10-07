@@ -28,8 +28,8 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     },
 
     convertSql = function(query, dbS) {
-      sql <- renderSql(sql = query, dbS)
-      sql <- translateSql(sql = sql, targetDialect = private$dbms)
+      sql <- renderSql(sql = query)$sql
+      sql <- translateSql(sql = sql, targetDialect = private$dbms)$sql
       return(sql)
     }
   ),
