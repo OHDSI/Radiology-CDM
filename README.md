@@ -54,8 +54,7 @@ install_github("NEONKID/RCDM-ETL")
    df <- createRadiologyImage(data = readRDS(path))
    ```
 
-3. Loads data from the RDS file into the RDBMS. 
-   (Using DBMSIO Class)
+3. Loads data from the RDS file into the RDBMS. (Using DBMSIO Class. ***Option A***)
 
    ```R
    # Example
@@ -68,10 +67,31 @@ install_github("NEONKID/RCDM-ETL")
    db <- DBMSIO$new(server = server, user = user, pw = pw, dbms = dbms)
    
    # df is radiology Data frame,,
-   db$insertDB(dbS = databaseSchema, tbS = tbSchema, df = df)
+   db$insertDB(dbS = databaseSchema, df = df)
    db$finalize()
    ```
 
+4. Loads data from the RDS file into the RDBMS. (Using DatabaseConnector and SqlRender, ***Option B***)
+
+   ```R
+   # Example
+   dbms <- "sql server"
+   user <- Sys.getenv("user")
+   pw <- Sys.getenv("pw")
+   server <- Sys.getenv("dbServer")
+   
+   # Write connect information
+   conDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms, user = user, password = pw, server = server)
+   
+   # Connect DBMS
+   con <- DatabaseConnector::connect(connectionDetails = conDetails)
+   
+   # insert tables...
+   DatabaseConnector::insertTable(connection = con, tableName = paste0(databaseSchema, tbSchema), data = df)
+   
+   # if want disconnect
+   DatabaseConnector::disconnect(connection = con)
+   ```
 
 
 ## Example / Documentation

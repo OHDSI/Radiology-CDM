@@ -33,7 +33,7 @@ for(i in 1:length(dirs)) {
 ######################################## Example Code: END ##########################################
 }
 \seealso{
-Radiology CDM Wiki: https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+Radiology CDM Wiki: https://github.com/NEONKID/RCDM-ETL/wiki
 }
 \author{
 Neon K.I.D

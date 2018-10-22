@@ -145,11 +145,6 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getWindowCenter = function() return(private$getTagValue(name = "WindowCenter")),
     getWindowWidth = function() return(private$getTagValue(name = "WindowWidth")),
 
-    # Image Type is SECONDARY DERIVED..
-    isDERIVED = function() {
-      # Todo: Write image type description...
-    },
-
     # free func in C...
     # finalize method in Java...
     finalize = function() {}

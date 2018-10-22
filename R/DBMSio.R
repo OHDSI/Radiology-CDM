@@ -27,7 +27,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       return(con)
     },
 
-    convertSql = function(query, dbS) {
+    convertSql = function(query) {
       sql <- renderSql(sql = query)$sql
       sql <- translateSql(sql = sql, targetDialect = private$dbms)$sql
       return(sql)
@@ -51,12 +51,35 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
 
     # [NOTICE]
     # Before call this function, create database and table,,
-    insertDB = function(dbS, tbS, df) {
-      dbSchema <- c(dbS, tbS)
-      tb <- Reduce(pasteSQL, dbSchema)
-      val <- paste0(apply(df, 1, function(x) paste0("('", paste0(x, collapse = "', '"), "')")), collapse = ", ")
-      sql <- paste0("INSERT INTO ",tb," VALUES ", val)
-      dbSendStatement(private$con, sql)
+    # using DatabaseConnector, but use connection DBMSIO object.
+    insertDB = function(dbS, data, dropTableIfExists = FALSE, createTable = TRUE, tempTable = FALSE, useMppBulkLoad = FALSE) {
+      occur_rows <- c(radiology_occurrence_ID, radiology_occurrence_date, radiology_occurrence_datetime,
+                      Person_ID, Condition_occurrence_id, Device_concept_id, radiology_modality_concept_ID,
+                      Person_orientation_concept, Person_position_concept, radiology_protocol_concept_id,
+                      Image_total_count, Anatomic_site_concept_id, radiology_Comment, Image_dosage_unit_concept,
+                      Dosage_value_as_number, Image_exposure_time_unit_concept, Image_exposure_time, Radiology_dirpath, Visit_occurrence_id)
+      img_rows <- c(Radiology_occurrence_ID, Person_ID, Person_orientation_concept, Image_type, radiology_phase_concept_id,
+                    Image_no, Phase_total_no, image_resolution_Rows, image_Resolution_Columns, Image_Window_Level_Center,
+                    Image_Window_Level_Width, Image_slice_thickness, image_filepath)
+
+      # Using dbms is Microsoft SQL server
+      if(private$dbms == "sql server")
+        tableName <- "dbo"
+
+      if(all(colnames(data) == occur_rows))
+        tableName <-Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Occurrence'))
+      else if(all(colnames(data) == img_rows))
+        tableName <- Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Image'))
+      else
+        stop("This data is not Radiology CDM \n Please check data and retry...")
+
+      insertTable(connection = private$con,
+                  tableName = tableName,
+                  data = data,
+                  dropTableIfExists = dropTableIfExists,
+                  createTable = createTable,
+                  tempTable = tempTable,
+                  useMppBulkLoad = useMppBulkLoad)
     },
 
     # Using SQL for RDBMS...
@@ -67,31 +90,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         sql <- paste0("SELECT * FROM ", tb)
       else
         sql <- paste0("SELECT * FROM ", tb, " WHERE ", condition)
-      return(querySql(connection = private$con, sql = private$convertSql(query = sql, dbS = dbS)))
-    },
-
-    # 4th val is concept_id, 5th image_Type
-    searchForImg = function(occur_id){
-      dbSchema <- 'Radiology_CDM.dbo'
-      tbSchema <- 'Radiology_Image'
-
-      tb <- Reduce(pasteSQL, c(dbSchema, tbSchema))
-      defSql <- paste0("SELECT * FROM ", tb)
-      return(querySql(connection = private$con, sql = paste0(defSql, " WHERE Radiology_occurrence_ID = ", occur_id)))
-    },
-
-    # 4th val is concept_id, 5th Directory Path
-    searchForOcur = function(occur_id = NULL) {
-      dbSchema <- 'Radiology_CDM.dbo'
-      tbSchema <- 'Radiology_Occurrence'
-
-      tb <- Reduce(pasteSQL, c(dbSchema, tbSchema))
-      defSql <- paste0("SELECT * FROM ", tb)
-      if(!is.null(occur_id))
-        df <- querySql(connection = private$con, sql = paste0(defSql, " WHERE Radiology_occurrence_ID = ", occur_id))
-      else
-        df <- querySql(connection = private$con, sql = paste0(defSql))
-      return(df)
+      return(querySql(connection = private$con, sql = private$convertSql(query = sql)))
     },
 
     finalize = function() disconnect(private$con)
