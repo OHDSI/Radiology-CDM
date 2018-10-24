@@ -48,7 +48,7 @@ View(df)
 ######################################## Example Code: END ##########################################
 }
 \seealso{
-https://github.com/NEONKID/DicomHeaderExtractionModule/wiki
+https://github.com/NEONKID/RCDM-ETL/wiki
 }
 \author{
 Neon K.I.D
