@@ -15,6 +15,13 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
     path = NULL,
     savePathRoot = NULL,
 
+    objectToRDS = function(data, savePath) {
+      # Save RDS..
+      saveRDS(object = data, file = savePath)
+      msg <- c(Sys.time(), " -> Saved: ", savePath)
+      print(Reduce(pasteNormal, msg))
+    },
+
     # Return DICOM file all headers...
     extractHdrData = function(path, rootPathCount, debugging) {
       # If see processbar, verbose set TRUE, don't see verbose set FALSE // DANGER R Studio crashing...
@@ -43,6 +50,10 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
 
     # All dcm files convert to RDS
     dcmToRDS = function(rootPathCount = 1, verbose = FALSE) {
+      if(!require('rapportools'))
+        install.packages('rapportools')
+      library('rapportools')
+
       print("Read Directories....")
       allList <- list.dirs(private$path, full.names = FALSE)
 
@@ -51,7 +62,7 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
       for(i in 1:length(allList)) {
         if(!is.empty(allList[i])) {
           print("Create Directories....")
-          createDir(allList[i])
+          createDir(private$savePathRoot, allList[i])
 
           # Load DICOM files
           loadPath <- Reduce(pastePath, c(private$path, allList[i]))
@@ -66,9 +77,9 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
               fileName <- strsplit(allList[i], split = "/")
 
               # folderPath/fileName.rds
-              rdsName <- c(savePathRoot, allList[i], Reduce(pasteNormal, c(tail(fileName[[1]], 1), ".rds")))
+              rdsName <- c(private$savePathRoot, allList[i], Reduce(pasteNormal, c(tail(fileName[[1]], 1), ".rds")))
               savePath <- Reduce(pastePath, rdsName)
-              objectToRDS(data, savePath)
+              private$objectToRDS(data, savePath)
             }
           }
         }

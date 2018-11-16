@@ -12,20 +12,13 @@ pastePath = pasteSep("/")
 pasteSQL = pasteSep(".")
 
 # Create directory...
-createDir <- function(path) {
+createDir <- function(savePathRoot, path) {
   dirPath <- Reduce(pastePath, c(savePathRoot, path))
   if(!dir.exists(dirPath)) {
     dir.create(path = dirPath, recursive = TRUE, mode = "0755")
     msg <- c(Sys.time(), " -> Created Dir: ", dirPath)
     print(Reduce(pasteNormal, msg))
   }
-}
-
-# Save RDS..
-objectToRDS <- function(data, savePath) {
-  saveRDS(object = data, file = savePath)
-  msg <- c(Sys.time(), " -> Saved: ", savePath)
-  print(Reduce(pasteNormal, msg))
 }
 
 # String equals Method,,

@@ -52,15 +52,15 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     # [NOTICE]
     # Before call this function, create database and table,,
     # using DatabaseConnector, but use connection DBMSIO object.
-    insertDB = function(dbS, data, dropTableIfExists = FALSE, createTable = TRUE, tempTable = FALSE, useMppBulkLoad = FALSE) {
-      occur_rows <- c(radiology_occurrence_ID, radiology_occurrence_date, radiology_occurrence_datetime,
-                      Person_ID, Condition_occurrence_id, Device_concept_id, radiology_modality_concept_ID,
-                      Person_orientation_concept, Person_position_concept, radiology_protocol_concept_id,
-                      Image_total_count, Anatomic_site_concept_id, radiology_Comment, Image_dosage_unit_concept,
-                      Dosage_value_as_number, Image_exposure_time_unit_concept, Image_exposure_time, Radiology_dirpath, Visit_occurrence_id)
-      img_rows <- c(Radiology_occurrence_ID, Person_ID, Person_orientation_concept, Image_type, radiology_phase_concept_id,
-                    Image_no, Phase_total_no, image_resolution_Rows, image_Resolution_Columns, Image_Window_Level_Center,
-                    Image_Window_Level_Width, Image_slice_thickness, image_filepath)
+    insertDB = function(dbS, data, dropTableIfExists = FALSE, createTable = FALSE, tempTable = FALSE, useMppBulkLoad = FALSE, progressBar = FALSE) {
+      occur_rows <- c('radiology_occurrence_ID', 'radiology_occurrence_date', 'radiology_occurrence_datetime',
+                      'Person_ID', 'Condition_occurrence_id', 'Device_concept_id', 'radiology_modality_concept_ID',
+                      'Person_orientation_concept', 'Person_position_concept', 'radiology_protocol_concept_id',
+                      'Image_total_count', 'Anatomic_site_concept_id', 'radiology_Comment', 'Image_dosage_unit_concept',
+                      'Dosage_value_as_number', 'Image_exposure_time_unit_concept', 'Image_exposure_time', 'Radiology_dirpath', 'Visit_occurrence_id')
+      img_rows <- c('Radiology_occurrence_ID', 'Person_ID', 'Person_orientation_concept', 'Image_type', 'radiology_phase_concept_id',
+                    'Image_no', 'Phase_total_no', 'image_resolution_Rows', 'image_Resolution_Columns', 'Image_Window_Level_Center',
+                    'Image_Window_Level_Width', 'Image_slice_thickness', 'image_filepath')
 
       # Using dbms is Microsoft SQL server
       if(private$dbms == "sql server")
@@ -79,7 +79,8 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
                   dropTableIfExists = dropTableIfExists,
                   createTable = createTable,
                   tempTable = tempTable,
-                  useMppBulkLoad = useMppBulkLoad)
+                  useMppBulkLoad = useMppBulkLoad,
+                  progressBar = progressBar)
     },
 
     # Using SQL for RDBMS...

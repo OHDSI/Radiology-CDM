@@ -13,7 +13,6 @@
 DicomRDS <- R6::R6Class(classname = "DicomRDS",
   private = list(
     # Parameter name is TagName
-    # Parameter data is RDS Data...
     getTagValue = function(name) {
       tryCatch({
         res <- self$data$value[which(ifelse(self$data$name %in% name, TRUE, FALSE))]
@@ -25,7 +24,18 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       })
       return(res)
     },
-    isValidTag = function(name) if(is.boolean(which(ifelse(self$data$name %in% name, TRUE, FALSE)) == 0)) TRUE else FALSE
+    isValidTag = function(name) if(is.boolean(which(ifelse(self$data$name %in% name, TRUE, FALSE)) == 0)) TRUE else FALSE,
+    getTagLength = function(name) {
+      tryCatch({
+        len <- as.numeric(self$data$length[which(ifelse(self$data$name %in% name, TRUE, FALSE))])
+        if(is.empty(x = len))
+          len <- NA
+      }, error = function(e) {
+        len <- NA
+        assign("len", len, envir = .GlobalEnv)
+      })
+      return(len)
+    }
   ),
 
   public = list(
@@ -44,7 +54,10 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
           if(pmatch(x = colorVal, "RGB", nomatch = FALSE) == 1)
             return(TRUE)
         }
-        return(FALSE)
+        if(private$isValidTag(name = "ContrastBolusRoute"))
+          return(TRUE)
+        else
+          return(FALSE)
       }, error = function(e) {
         return(FALSE)
       })
@@ -53,15 +66,15 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     # Creation Radiology ID
     createOccurrenceID = function() {
       seriesID <- unlist(strsplit(x = private$getTagValue("SeriesInstanceUID"), split = '[.]'))
-      studyTime <- unlist(strsplit(x = private$getTagValue("StudyTime"), split = '[.]'))
+      studyID <- unlist(strsplit(x = private$getTagValue("StudyInstanceUID"), split = '[.]'))
 
       x <- seriesID[length(seriesID)]
       y <- as.numeric(
-        substr(x = studyTime[1], start = nchar(studyTime[1]) - 4, stop = nchar(studyTime[1]))
+        substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
       )
 
       directoryID <- self$getDirectoryID()
-      i <- as.numeric(directoryID)
+      i <- directoryID
       z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
 
       # Numbering...
@@ -77,7 +90,8 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       set.seed(i)
       # lets <- toupper(sample(letters,x, replace = TRUE))
       nums <- sprintf(size, sample(1:max.val)[1:nchar(trunc(z))])
-      return(paste(nums, sep = ""))
+      res <- paste(nums, sep = "")
+      return(sum(as.integer(res)))
     },
 
     getStudyDate = function() return(private$getTagValue("StudyDate")),
@@ -123,8 +137,10 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getStudyID = function() return(private$getTagVAlue("StudyID")),
     getDirectoryID = function() {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
-      shortPath <- tail(x = unlist(sp), -2)
-      return(str_extract(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
+      shortPath <- tail(x = unlist(sp), -1)
+      nVec <- unlist(str_extract_all(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
+      num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
+      return(as.numeric(num))
     },
     getImageType = function() {
       exType <- private$getTagValue("ImageType")
