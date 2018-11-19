@@ -1,4 +1,8 @@
 # Integrated readDICOM Func...
+if(!require('oro.dicom'))
+  install.packages('oro.dicom')
+library('oro.dicom')
+
 readDCM <- function(path, debug = FALSE, view = FALSE) {
   if(view) {
     if(is.list(path))
@@ -34,11 +38,13 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
       # print(path)
       resImg <- readDICOM(path = path, verbose = debug)
     }, error = function(e) {
-      errComment <- c("readDICOM func error: ", e)
-      errFile <- c("Change func readDICOMFile: ", path)
+        if(debug) {
+          errComment <- c("readDICOM func error: ", e)
+          errFile <- c("Change func readDICOMFile: ", path)
 
-      print(Reduce(pasteNormal, errComment))
-      print(Reduce(pasteNormal, errFile))
+          print(Reduce(pasteNormal, errComment))
+          print(Reduce(pasteNormal, errFile))
+        }
 
       # Retry not parse pixelData function..
       resImg <- readDICOMFile(fname = path, pixelData = FALSE)
@@ -46,4 +52,25 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
     })
     return(resImg)
   }
+}
+
+convertNifti <- function(filePath) {
+  files <- list.files(path = filePath, pattern = "\\.dcm$", full.names = TRUE)
+  nifList <- NA
+
+  for(i in 1:length(files)) {
+    tryCatch({
+      img <- oro.dicom::readDICOM(path = files[i], recursive = TRUE)
+      nif <- oro.dicom::dicom2nifti(dcm = img)
+      if(is.na(nifList))
+        nifList <- nif
+      else if(length(dim(nifList)) == 3)
+        nifList <- abind::abind(nifList, nif, along = 1)
+      else if(length(dim(nifList)) == 2)
+        nifList <- abind::abind(nifList, nif, along = 0)
+    }, error = function(e) {
+      print(Reduce(pasteNormal, c("Error for ", files[i])))
+    })
+  }
+  return(nifList)
 }

@@ -38,7 +38,7 @@ createRadiologyOccurrence <- function(path) {
     data <- readRDS(file = fileList[f])
 
     for(i in 1:length(data)) {
-      num <- 1
+      num <- as.integer(1)
       if(!is.null(data[[i]])) {
         dcmRDS <- DicomRDS$new(data[[i]])
 
@@ -48,7 +48,7 @@ createRadiologyOccurrence <- function(path) {
         rDirPath <- head(unlist(sp), -1)
         rDirPath <- Reduce(pastePath, rDirPath)
 
-        roID <- dcmRDS$createOccurrenceID()
+        roID <- as.integer(dcmRDS$createOccurrenceID())
         if(num == 1) {
           studyDatetime <- dcmRDS$getStudyDateTime()
 
@@ -57,7 +57,7 @@ createRadiologyOccurrence <- function(path) {
           for(k in length(data):i) {
             dcmRDSk <- DicomRDS$new(data[[k]])
             duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
-            if(!is.empty(duringTime)) break else duringTime <- ''
+            if(!is.empty(duringTime)) break else duringTime <- NA
             dcmRDSk$finalize()
           }
         }
@@ -73,11 +73,11 @@ createRadiologyOccurrence <- function(path) {
         # Contrast Information,,
         # TRUE = Post image
         # FALSE = Pre image
-        rpcID <- "Pre"
+        rpcID <- "Pre Contrast"
         for(j in i:length(data)) {
           dcmRDSj <- DicomRDS$new(data[[j]])
           if(dcmRDSj$isPost4BrainCT()) {
-            rpcID <- "Post"
+            rpcID <- "Post Contrast"
             break
           }
           dcmRDSj$finalize()
@@ -98,32 +98,32 @@ createRadiologyOccurrence <- function(path) {
     radiology_occurrence_date[f] <- getDate(dcmRDS$getStudyDate())
     radiology_occurrence_datetime[f] <- studyDatetime
 
-    Person_ID[f] <- pID
-    Condition_occurrence_id[f] <- coID
+    Person_ID[f] <- as.integer(pID)
+    Condition_occurrence_id[f] <- as.integer(coID)
     Device_concept_id[f] <- dcID
 
-    radiology_modality_concept_ID[f] <- modality
-    Person_position_concept[f] <- pocID
-    Person_orientation_concept[f] <- oriID
-    radiology_protocol_concept_id[f] <- rpcID
+    radiology_modality_concept_ID[f] <- modality  # VARCHAR
+    Person_position_concept[f] <- pocID           # VARCHAR
+    Person_orientation_concept[f] <- oriID        # VARCHAR
+    radiology_protocol_concept_id[f] <- rpcID     # This is ID but varchar now
 
-    Image_total_count[f] <- tCount
-    Anatomic_site_concept_id[f] <- ascID
+    Image_total_count[f] <- as.integer(tCount)
+    Anatomic_site_concept_id[f] <- as.integer(ascID)
     radiology_Comment[f] <- imgComment
 
     Image_dosage_unit_concept[f] <- dosage
-    Dosage_value_as_number[f] <- dosageNum
+    Dosage_value_as_number[f] <- as.numeric(dosageNum)
     Image_exposure_time_unit_concept[f] <- timeUnit
 
     Image_exposure_time[f] <- duringTime
     Radiology_dirpath[f] <- rDirPath
-    Visit_occurrence_id[f] <- voID
+    Visit_occurrence_id[f] <- as.integer(voID)
   }
 
   # Final Data Model
   Radiology_occurrence <- data.frame(
     radiology_occurrence_ID,
-    Radiology_occurrence_date,
+    radiology_occurrence_date,
     radiology_occurrence_datetime,
     Person_ID,
     Condition_occurrence_id,
@@ -162,7 +162,7 @@ createRadiologyImage <- function(data) {
   Person_ID <- c()
   Person_orientation_concept <- c()
   Image_type <- c()
-  radiology_phase_concept_id <- c()
+  radiology_phase_concept <- c()
   Image_no <- c()
   Phase_total_no <- c()
   image_resolution_Rows <- c()
@@ -177,7 +177,7 @@ createRadiologyImage <- function(data) {
   rID <- NA
   reNum <- 1
 
-  # Current imageType, radiology_phase_concept_id
+  # Current imageType, radiology_phase_concept
   curimType <- NA
   curPCID <- NA
 
@@ -196,11 +196,11 @@ createRadiologyImage <- function(data) {
       # Contrast Information,,
       # TRUE = Post. Additional, Color format is RGB that 3D IMAGE FORMAT..
       # FALSE = Pre
-      rpcID <- "Pre"
-      if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED"
-      else if(dcmRDS$isPost4BrainCT()) rpcID <- "Post"
+      rpcID <- "Pre Contrast"
+      if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED Image"
+      else if(dcmRDS$isPost4BrainCT()) rpcID <- "Post Contrast"
 
-      radiology_phase_concept_id[num] <- rpcID
+      radiology_phase_concept[num] <- rpcID
       thickness <- dcmRDS$getThickness()
       Phase_total_no[num] <- 0
 
@@ -209,7 +209,7 @@ createRadiologyImage <- function(data) {
 
       # Checking Phase number..
       if(num == 1) {
-        rID <- dcmRDS$createOccurrenceID()
+        rID <- as.integer(dcmRDS$createOccurrenceID())
         curimType <- imType
         curPCID <- rpcID
       } else if(is.na(pmatch(x = rpcID, curPCID, nomatch = NA_character_))
@@ -227,13 +227,13 @@ createRadiologyImage <- function(data) {
           Phase_total_no[k] <- pNum
       }
 
-      Image_no[num] <- pNum
-      Radiology_occurrence_ID[num] <- rID
-      image_resolution_Rows[num] <- rows
-      image_Resolution_Columns[num] <- columns
+      Image_no[num] <- as.integer(pNum)
+      Radiology_occurrence_ID[num] <- as.integer(rID)
+      image_resolution_Rows[num] <- as.integer(rows)
+      image_Resolution_Columns[num] <- as.integer(columns)
       Image_Window_Level_Center[num] <- dcmRDS$getWindowCenter()
       Image_Window_Level_Width[num] <- dcmRDS$getWindowWidth()
-      Image_slice_thickness[num] <- if(is.empty(thickness) || num == 1) '' else thickness
+      Image_slice_thickness[num] <- if(is.empty(thickness)) '' else as.numeric(thickness)
       Image_type[num] <- imType
       Person_orientation_concept[num] <- pocID
       image_filepath[num] <- as.character(data[[i]]$path[1])
@@ -248,7 +248,7 @@ createRadiologyImage <- function(data) {
     Person_ID,
     Person_orientation_concept,
     Image_type,
-    radiology_phase_concept_id,
+    radiology_phase_concept,
     Image_no,
     Phase_total_no,
     image_resolution_Rows,
