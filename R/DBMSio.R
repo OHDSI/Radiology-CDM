@@ -52,22 +52,21 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     # [NOTICE]
     # Before call this function, create database and table,,
     # using DatabaseConnector, but use connection DBMSIO object.
+
+    # Read Radiology Database table columns,,
+    # occur_rows: Radiology_Occurrence.rda
+    # img_rows: Radiology_Image.rda
     insertDB = function(dbS, data, dropTableIfExists = FALSE, createTable = FALSE, tempTable = FALSE, useMppBulkLoad = FALSE, progressBar = FALSE) {
-      occur_rows <- c('radiology_occurrence_ID', 'radiology_occurrence_date', 'radiology_occurrence_datetime',
-                      'Person_ID', 'Condition_occurrence_id', 'Device_concept_id', 'radiology_modality_concept_ID',
-                      'Person_orientation_concept', 'Person_position_concept', 'radiology_protocol_concept_id',
-                      'Image_total_count', 'Anatomic_site_concept_id', 'radiology_Comment', 'Image_dosage_unit_concept',
-                      'Dosage_value_as_number', 'Image_exposure_time_unit_concept', 'Image_exposure_time', 'Radiology_dirpath', 'Visit_occurrence_id')
-      img_rows <- c('Radiology_occurrence_ID', 'Person_ID', 'Person_orientation_concept', 'Image_type', 'radiology_phase_concept_id',
-                    'Image_no', 'Phase_total_no', 'image_resolution_Rows', 'image_Resolution_Columns', 'Image_Window_Level_Center',
-                    'Image_Window_Level_Width', 'Image_slice_thickness', 'image_filepath')
+      files <- list.files(path = 'resources', pattern = '\\.rda$', full.names = TRUE)
+      for(i in 1:length(files))
+        load(files[i])
 
       # Using dbms is Microsoft SQL server
       if(private$dbms == "sql server")
         tableName <- "dbo"
 
       if(all(colnames(data) == occur_rows))
-        tableName <-Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Occurrence'))
+        tableName <- Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Occurrence'))
       else if(all(colnames(data) == img_rows))
         tableName <- Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Image'))
       else
@@ -84,7 +83,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     },
 
     # Using SQL for RDBMS...
-    searchUseSQL = function(dbS, tbS, condition = NULL) {
+    dbGetdtS = function(dbS, tbS, condition = NULL) {
       dbSchema <- c(dbS, tbS)
       tb <- Reduce(pasteSQL, dbSchema)
       if(is.null(condition))
