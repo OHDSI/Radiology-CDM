@@ -138,7 +138,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getDirectoryID = function() {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
-      nVec <- unlist(str_extract_all(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
+      nVec <- unlist(stringr::str_extract_all(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
       num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
       return(as.numeric(num))
     },
