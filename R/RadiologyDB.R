@@ -1,3 +1,7 @@
+if(!require('rapportools'))
+  install.packages('rapportools')
+library('rapportools')
+
 #'createRadiologyOccurrence
 #'
 #'This function creates the Occurrence table based on Radiology CDM.
