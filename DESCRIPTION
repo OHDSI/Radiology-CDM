@@ -10,10 +10,11 @@ Imports:
   oro.dicom,
   oro.nifti,
   dplyr,
-  lambda.r,
   rapportools,
   papayar,
-  R6
+  R6,
+  foreach,
+  stringr
 License: Apache 2.0
 Encoding: UTF-8
 LazyData: true
