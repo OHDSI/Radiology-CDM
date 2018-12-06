@@ -1,6 +1,6 @@
 # Radiology CDM ETL Module
 
-[![Build Status](https://travis-ci.org/NEONKID/RCDM-ETL.svg?branch=master)](https://travis-ci.org/NEONKID/RCDM-ETL)
+[![Build Status](https://travis-ci.com/OHDSI/Radiology-CDM.svg?branch=master)](https://travis-ci.com/OHDSI/Radiology-CDM)
 
 
 
