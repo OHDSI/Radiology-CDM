@@ -25,7 +25,7 @@ devtools, dplyr, oro.dicom, rapportools, papayar, oro.nifti, DatabaseConnector, 
 ## How to install
 
 ```R
-install_github("NEONKID/RCDM-ETL")
+install_github("OHDSI/Radiology-CDM")
 ```
 
 
