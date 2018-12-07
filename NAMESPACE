@@ -3,5 +3,4 @@
 export(DBMSIO)
 export(DcmFileModule)
 export(DicomRDS)
-export(createRadiologyImage)
-export(createRadiologyOccurrence)
+export(RadDB)

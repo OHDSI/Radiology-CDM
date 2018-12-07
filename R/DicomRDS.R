@@ -1,3 +1,5 @@
+library(stringr)
+
 #################################### DicomRDS Class #############################################
 #' DicomRDS Class
 #'
@@ -134,18 +136,18 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
 
     getSourceID = function() return(private$getTagValue("SOPInstanceUID")),
     getPersonID = function() return(private$getTagValue("PatientID")),
-    getStudyID = function() return(private$getTagVAlue("StudyID")),
+    getStudyID = function() return(private$getTagValue("StudyID")),
     getDirectoryID = function() {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
-      nVec <- unlist(stringr::str_extract_all(string = shortPath[1], pattern = "\\-*\\d+\\.*\\d*"))
+      nVec <- unlist(stringr::str_extract_all(string = shortPath[2], pattern = "\\-*\\d+\\.*\\d*"))
       # num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
       return(as.numeric(nVec))
     },
     getImageType = function() {
       exType <- private$getTagValue("ImageType")
       if(!is.na(exType)) {
-        if(str_detect(string = exType, pattern = "ORIGINAL"))
+        if(stringr::str_detect(string = exType, pattern = "ORIGINAL"))
           imType <- "PRIMARY"
         else if(is.boolean(str_detect(exType, "DERIVED")))
           imType <- "SECONDARY"

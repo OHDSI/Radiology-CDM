@@ -1,6 +1,6 @@
 # Radiology CDM ETL Module
 
-[![Build Status](https://travis-ci.org/NEONKID/RCDM-ETL.svg?branch=master)](https://travis-ci.org/NEONKID/RCDM-ETL)
+[![Build Status](https://travis-ci.com/OHDSI/Radiology-CDM.svg?branch=master)](https://travis-ci.com/OHDSI/Radiology-CDM)
 
 
 
@@ -25,7 +25,7 @@ devtools, dplyr, oro.dicom, rapportools, papayar, oro.nifti, DatabaseConnector, 
 ## How to install
 
 ```R
-install_github("NEONKID/RCDM-ETL")
+install_github("OHDSI/Radiology-CDM")
 ```
 
 
@@ -45,13 +45,23 @@ install_github("NEONKID/RCDM-ETL")
 
    ```R
    # Example 
-   path <- "/home/ohdsi/dicom.rds"
    
-   # Create Data frame for Radiology Occurrence Table (based on Radiology CDM)
-   df <- createRadiologyOccurrence(path)
+   # Create Radiology_Occurrence table for rds Path
+   rdsPath <- "/home/ohdsi/Radiology/rdsfiles"
    
-   # Create Data frame Radiology Image Table (based on Radiology CDM)
-   df <- createRadiologyImage(data = readRDS(path))
+   # Create RadDB object,,
+   # If using pararell, require pararell package
+   RDB <- RadDB$new(core = parallel::detectCores() - 1)
+   
+   # Get Radiology_Occurrence table
+   occur <- RDB$createRadiologyOccurrence(path = rdsPath)
+   
+   # Create Radiology_Image table for read RDS file
+   rdsFile <- "/home/ohdsi/DICOM-header/header.rds"
+   data <- readRDS(file = rdsFile)
+   
+   # Get Radiology_Image table
+   img <- RDB$createRadiologyImage(data = data)
    ```
 
 3. Loads data from the RDS file into the RDBMS. (Using DBMSIO Class. ***Option A***)
