@@ -93,7 +93,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       # lets <- toupper(sample(letters,x, replace = TRUE))
       nums <- sprintf(size, sample(1:max.val)[1:nchar(trunc(z))])
       res <- paste(nums, sep = "")
-      return(sum(as.integer(res)))
+      return(sum(as.numeric(res)))
     },
 
     getStudyDate = function() return(private$getTagValue("StudyDate")),
@@ -162,6 +162,8 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getImgCols = function() return(private$getTagValue(name = "Columns")),
     getWindowCenter = function() return(private$getTagValue(name = "WindowCenter")),
     getWindowWidth = function() return(private$getTagValue(name = "WindowWidth")),
+
+    isPixelData = function() return(private$getTagLength("PixelData") != -1),
 
     # free func in C...
     # finalize method in Java...

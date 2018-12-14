@@ -11,10 +11,11 @@ Imports:
   oro.nifti,
   dplyr,
   rapportools,
-  papayar,
   R6,
   foreach,
-  stringr
+  stringr,
+  doSNOW,
+  parallel
 License: Apache 2.0
 Encoding: UTF-8
 LazyData: true

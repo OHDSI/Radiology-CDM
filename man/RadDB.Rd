@@ -12,38 +12,31 @@ RadDB$new(core)
 \item{core}{Number of cores to use}
 }
 \description{
-This class is a class that imports various metadata by reading an RDS file containing DICOM information.
-There are basically functions that import data related to Radiology CDM.
+This is a class that creates an RCDM using an extracted RDS file.
+Parallel processing is supported only in the current Occurrence table,
+and it is recommended that the image table not be processed in parallel
+because of the computer science problem that the number of images in the image table does not match.
+Even if you set Pararell through the constructor, it is not supported by the Image method.
 }
 \examples{
-############################# Example Code: Read DICOM RDS File   ###################################
+############################# Example Code: Convert Radiology CDM  ###################################
 
+# Create Radiology_Occurrence table for rds Path
+rdsPath <- "/home/ohdsi/Radiology/rdsfiles"
+
+# Create RadDB object,,
+# If using pararell, require pararell package
+RDB <- RadDB$new(core = parallel::detectCores() - 1)
+
+# Get Radiology_Occurrence table
+occur <- RDB$createRadiologyOccurrence(path = rdsPath)
+
+# Create Radiology_Image table for read RDS file
 rdsFile <- "/home/ohdsi/DICOM-header/header.rds"
-
 data <- readRDS(file = rdsFile)
 
-# If single data (only one metadata in dicom file )
-dcmRDS <- DicomRDS$new(data)
-
-# Create Occurrence ID for radiology image
-roID <- dcmRDS$createOccurrenceID()
-
-# Get PatientID
-patientid <- dcmRDS$getPatientID()
-
-# This radiology contast or non-contrast
-isContrast <- dcmRDS$isPost4BrainCT()
-
-# If Multi data
-for(i in 1:length(data)) {
-  dcmRDS <- DicomRDS$new(data[[i]])
-  roID <- dcmRDS$createOccurrenceID()
-  patientid <- dcmRDS$getPatientID()
-  isContrast <- dcmRDS$isPost4BrainCT()
-  df <- data.frame(roID, patientid, isContrast)
-}
-
-View(df)
+# Get Radiology_Image table
+img <- RDB$createRadiologyImage(data = data)
 
 ######################################## Example Code: END ##########################################
 }

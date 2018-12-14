@@ -49,3 +49,16 @@ combinePath <- function(prefix, path) {
     return(newList)
   } else return(Reduce(pastePath, c(prefix, list)))
 }
+
+as.float <- function(x, digits) {
+  options(digits = digits)
+  ret <- as.numeric(x)
+  options(digits = 1)
+  return(ret)
+}
+
+as.bigint <- function(x, scipen) {
+  options(scipen = scipen)
+  ret <- as.numeric(x)
+  return(ret)
+}
