@@ -48,7 +48,7 @@ View(df)
 ######################################## Example Code: END ##########################################
 }
 \seealso{
-https://github.com/NEONKID/RCDM-ETL/wiki
+https://github.com/OHDSI/Radiology-CDM/wiki
 }
 \author{
 Neon K.I.D

@@ -221,7 +221,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           }
 
           Image_no[num] <- as.integer(pNum)
-          Radiology_occurrence_ID[num] <- as.integer(rID)
+          Radiology_occurrence_ID[num] <- as.bigint(rID, 4)
           image_resolution_Rows[num] <- as.integer(rows)
           image_Resolution_Columns[num] <- as.integer(columns)
           Image_Window_Level_Center[num] <- dcmRDS$getWindowCenter()
