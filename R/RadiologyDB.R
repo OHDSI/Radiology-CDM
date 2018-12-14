@@ -11,7 +11,7 @@ library(rapportools)
 #' Even if you set Pararell through the constructor, it is not supported by the Image method.
 #'
 #' @param core Number of cores to use
-#' @seealso https://github.com/NEONKID/RCDM-ETL/wiki
+#' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
 #' @usage RadDB$new(core)
 #' @author Neon K.I.D
 #' @example Examples/RadDB_Ex.R

@@ -7,7 +7,7 @@ library(stringr)
 #' There are basically functions that import data related to Radiology CDM.
 #'
 #' @param data Data frame imported from DICOM RDS file
-#' @seealso https://github.com/NEONKID/RCDM-ETL/wiki
+#' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
 #' @usage DicomRDS$new(data)
 #' @author Neon K.I.D
 #' @example Examples/DicomRDS_Ex.R
