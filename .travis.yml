@@ -10,14 +10,18 @@ addons:
 script:
   - R CMD build .
 
-r_packages: 
+r_packages:
   - devtools
   - dplyr
   - oro.dicom
   - oro.nifti
-  - lambda.r
+  - doSNOW
   - rapportools
-  - papayar
+  - foreach
+  - R6
+  - parallel
+  - stringr
 
-r_github_packages: 
+r_github_packages:
   - OHDSI/DatabaseConnector
+  - OHDSI/SqlRender

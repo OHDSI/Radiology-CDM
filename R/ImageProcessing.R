@@ -1,7 +1,5 @@
 # Integrated readDICOM Func...
-if(!require('oro.dicom'))
-  install.packages('oro.dicom')
-library('oro.dicom')
+library(oro.dicom)
 
 readDCM <- function(path, debug = FALSE, view = FALSE) {
   if(view) {

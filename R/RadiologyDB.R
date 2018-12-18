@@ -1,5 +1,5 @@
-library(rapportools)
 library(foreach)
+library(rapportools)
 
 ###################################### RadDB Class #############################################
 #' RadDB Class
@@ -11,49 +11,39 @@ library(foreach)
 #' Even if you set Pararell through the constructor, it is not supported by the Image method.
 #'
 #' @param core Number of cores to use
-#' @seealso https://github.com/NEONKID/RCDM-ETL/wiki
+#' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
 #' @usage RadDB$new(core)
 #' @author Neon K.I.D
 #' @example Examples/RadDB_Ex.R
 #' @export
 RadDB <- R6::R6Class(classname = "RadDB",
   private = list(
+    cl = NULL,
+    needFunc = c('as.bigint', 'as.float', 'getDate', 'pastePath'),
     mergeDfList = function(x, y) merge(x, y, all = TRUE)
   ),
 
   public = list(
     initialize = function(core) {
       # Parallel Processing
-      doParallel::registerDoParallel(core)
+      private$cl <- parallel::makePSOCKcluster(core)
+      doSNOW::registerDoSNOW(private$cl)
     },
 
     createRadiologyOccurrence = function(path) {
       fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE, pattern = "\\.rds$")
+      writeLines('Create Radiology_Occurrence Data frame....')
+      pb <- txtProgressBar(min = 0, max = length(fileList), style = 3)
 
-      radiology_occurrence_ID <- c()
-      radiology_occurrence_date <- c(as.Date(NA))
-      radiology_occurrence_datetime <- c(as.POSIXct(rep(NA)))
-      Person_ID <- c()
-      Condition_occurrence_id <- c()
-      Device_concept_id <- c()
-      radiology_modality_concept_ID <- c()
-      Person_orientation_concept <- c()
-      Person_position_concept <- c()
-      radiology_protocol_concept_id <- c()
-      Image_total_count <- c()
-      Anatomic_site_concept_id <- c()
-      radiology_Comment <- c()
-      Image_dosage_unit_concept <- c()
-      Dosage_value_as_number <- c()
-      Image_exposure_time_unit_concept <- c()
-      Image_exposure_time <- c()
-      Radiology_dirpath <- c()
-      Visit_occurrence_id <- c()
+      progress <- function(n) setTxtProgressBar(pb, n)
+      opts <- list(progress=progress)
 
-      ro <- foreach(f = 1:length(fileList)) %dopar% {
+      ro <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = 'rapportools', .export = private$needFunc) %dopar% {
         data <- readRDS(file = fileList[f])
+        setTxtProgressBar(pb = pb, value = f)
+        Sys.sleep(0.01)
         for(i in 1:length(data)) {
-          if(is.null(data[[i]]))
+          if(is.empty(data[[i]]))
             stop("ERROR: There is an empty value in the data frame.")
           else {
             dcmRDS <- DicomRDS$new(data[[i]])
@@ -63,8 +53,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
             sp <- strsplit(as.character(data[[i]]$path[1]), '/')
             rDirPath <- head(unlist(sp), -1)
             rDirPath <- Reduce(pastePath, rDirPath)
+            #rDirPath <- file.path(rDirPath)
 
-            roID <- as.integer(dcmRDS$createOccurrenceID())
+            roID <- dcmRDS$createOccurrenceID()
             studyDatetime <- dcmRDS$getStudyDateTime()
 
             # Searching AcquisitionDateTime...
@@ -108,13 +99,13 @@ RadDB <- R6::R6Class(classname = "RadDB",
           }
         }
 
-        radiology_occurrence_ID <- roID
-        radiology_occurrence_date <- getDate(dcmRDS$getStudyDate())
-        radiology_occurrence_datetime <- studyDatetime
+        radiology_occurrence_ID <- as.bigint(roID, 4)
+        radiology_occurrence_date <- as.Date(getDate(dcmRDS$getStudyDate()))
+        radiology_occurrence_datetime <- as.POSIXct(studyDatetime)
 
-        Person_ID <- as.integer(pID)
+        Person_ID <- as.bigint(pID, 4)
         Condition_occurrence_id <- as.integer(coID)
-        Device_concept_id <- dcID
+        Device_concept_id <- as.integer(dcID)
 
         radiology_modality_concept_ID <- modality  # VARCHAR
         Person_position_concept <- pocID           # VARCHAR
@@ -128,8 +119,8 @@ RadDB <- R6::R6Class(classname = "RadDB",
         Image_dosage_unit_concept <- dosage
         Dosage_value_as_number <- as.numeric(dosageNum)
         Image_exposure_time_unit_concept <- timeUnit
+        Image_exposure_time <- as.float(x = duringTime, digits = 5)
 
-        Image_exposure_time <- duringTime
         Radiology_dirpath <- rDirPath
         Visit_occurrence_id <- as.integer(voID)
 
@@ -230,7 +221,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           }
 
           Image_no[num] <- as.integer(pNum)
-          Radiology_occurrence_ID[num] <- as.integer(rID)
+          Radiology_occurrence_ID[num] <- as.bigint(rID, 4)
           image_resolution_Rows[num] <- as.integer(rows)
           image_Resolution_Columns[num] <- as.integer(columns)
           Image_Window_Level_Center[num] <- dcmRDS$getWindowCenter()
@@ -264,7 +255,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
       return(Radiology_Image)
     },
 
-    finalize = function() {}
+    finalize = function() {
+      parallel::stopCluster(cl = private$cl)  # Requirement
+    }
   )
 )
 

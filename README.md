@@ -17,12 +17,13 @@ The main functions include the Pre and Post identification algorithms of CT and 
 This package uses OHDSI's DatabaseConnector, oro.dicom package, and so on. In addition, some functions are implemented in Lambda, so you will also need the lambda.r package. In addition, You should also include the R6 package using object-oriented programming techniques such as Java and the C# language.
 
 ```
-devtools, dplyr, oro.dicom, rapportools, papayar, oro.nifti, DatabaseConnector, SqlRender, R6, stringr
+devtools, dplyr, oro.dicom, rapportools, oro.nifti, DatabaseConnector, SqlRender, R6, stringr, parallel, doSNOW
 ```
 
 
 
 ## How to install
+![install_RCDM](./image/image_RCDM.gif)
 
 ```R
 install_github("OHDSI/Radiology-CDM")
