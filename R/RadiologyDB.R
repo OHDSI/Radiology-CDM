@@ -150,7 +150,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       return(Reduce(private$mergeDfList, ro))
     },
 
-    createRadiologyImage = function(data) {
+    createRadiologyImage = function(data, validpixelonly = FALSE) {
       Radiology_occurrence_ID <- c()
       Person_ID <- c()
       Person_orientation_concept <- c()
@@ -177,6 +177,10 @@ RadDB <- R6::R6Class(classname = "RadDB",
       for(i in 1:length(data)) {
         if(!is.null(data[[i]])) {
           dcmRDS <- DicomRDS$new(data[[i]])
+          if(validpixelonly) {
+            if(!dcmRDS$isPixelData())
+              next
+          }
           Person_ID[num] <- dcmRDS$getDirectoryID()
 
           # PatientPosition is null .... blank
