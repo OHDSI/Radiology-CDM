@@ -1,3 +1,6 @@
+require(foreach)
+require(rapportools)
+
 ################################ DcmFileModule Class #############################################
 #' DcmFileModule Class
 #'
@@ -14,6 +17,9 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
   private = list(
     path = NULL,
     savePathRoot = NULL,
+    cl = NULL,
+    needFunc = c('createDir', 'pastePath', 'pasteNormal', 'private'),
+    needPkg = c('rapportools', 'oro.dicom'),
 
     objectToRDS = function(data, savePath) {
       # Save RDS..
@@ -43,25 +49,28 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
   ),
 
   public = list(
-    initialize = function(path, savePathRoot) {
+    initialize = function(path, savePathRoot, core) {
       private$path <- path
       private$savePathRoot <- savePathRoot
+
+      # Parallel Processing
+      private$cl <- parallel::makePSOCKcluster(core)
+      doSNOW::registerDoSNOW(private$cl)
     },
 
     # All dcm files convert to RDS
     dcmToRDS = function(rootPathCount = 1, verbose = FALSE) {
-      if(!require('rapportools'))
-        install.packages('rapportools')
-      library('rapportools')
-
-      print("Read Directories....")
       allList <- list.dirs(private$path, full.names = FALSE)
+      writeLines('Metadata and pixeldata are combined into a single DB....')
+      pb <- txtProgressBar(min = 0, max = length(allList), style = 3)
+
+      progress <- function(n) setTxtProgressBar(pb, n)
+      opts <- list(progress=progress)
 
       # Create All directory...
       # Explore Files...
-      for(i in 1:length(allList)) {
+      dtor <- foreach(i = 1:length(allList), .options.snow = opts, .packages = private$needPkg, .export = private$needFunc) %dopar% {
         if(!is.empty(allList[i])) {
-          print("Create Directories....")
           createDir(private$savePathRoot, allList[i])
 
           # Load DICOM files
@@ -84,8 +93,11 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
           }
         }
       }
+      return(Filter(Negate(is.null), dtor))
     },
-    finalize = function() {}
+    finalize = function() {
+      parallel::stopCluster(cl = private$cl)  # Requirement
+    }
   )
 )
 

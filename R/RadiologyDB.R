@@ -1,5 +1,5 @@
-library(foreach)
-library(rapportools)
+require(foreach)
+require(rapportools)
 
 ###################################### RadDB Class #############################################
 #' RadDB Class

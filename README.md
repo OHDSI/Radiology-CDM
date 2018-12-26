@@ -22,7 +22,7 @@ Radiology-CDM extracts Metadata and Pixeldata from DICOM file, which is the orig
 
 ## Extraction sequence
 
-See the wiki for details on ETL methods.
+See the [wiki](https://github.com/OHDSI/Radiology-CDM/wiki/How-to-extract) for details on ETL methods.
 
 
 
