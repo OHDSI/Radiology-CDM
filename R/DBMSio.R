@@ -72,6 +72,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       else
         stop("This data is not Radiology CDM \n Please check data and retry...")
 
+      writeLines(text = sprintf('Insert the %s into the database', tableName))
       insertTable(connection = private$con,
                   tableName = tableName,
                   data = data,
