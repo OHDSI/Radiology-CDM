@@ -1,5 +1,5 @@
-library(foreach)
-library(rapportools)
+require(foreach)
+require(rapportools)
 
 ###################################### RadDB Class #############################################
 #' RadDB Class
@@ -105,7 +105,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
         Person_ID <- as.bigint(pID, 4)
         Condition_occurrence_id <- as.integer(coID)
-        Device_concept_id <- as.integer(dcID)
+        Device_concept_id <- as.bigint(dcID, 4)
 
         radiology_modality_concept_ID <- modality  # VARCHAR
         Person_position_concept <- pocID           # VARCHAR
@@ -122,7 +122,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
         Image_exposure_time <- as.float(x = duringTime, digits = 5)
 
         Radiology_dirpath <- rDirPath
-        Visit_occurrence_id <- as.integer(voID)
+        Visit_occurrence_id <- as.bigint(voID, 4)
 
         data.frame(
           radiology_occurrence_ID,
@@ -150,7 +150,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       return(Reduce(private$mergeDfList, ro))
     },
 
-    createRadiologyImage = function(data) {
+    createRadiologyImage = function(data, validpixelonly = FALSE) {
       Radiology_occurrence_ID <- c()
       Person_ID <- c()
       Person_orientation_concept <- c()
@@ -177,7 +177,11 @@ RadDB <- R6::R6Class(classname = "RadDB",
       for(i in 1:length(data)) {
         if(!is.null(data[[i]])) {
           dcmRDS <- DicomRDS$new(data[[i]])
-          Person_ID[num] <- dcmRDS$getDirectoryID()
+          if(validpixelonly) {
+            if(!dcmRDS$isPixelData())
+              next
+          }
+          Person_ID[num] <- as.bigint(dcmRDS$getDirectoryID(), 4)
 
           # PatientPosition is null .... blank
           pocID <- dcmRDS$getOrientation()
