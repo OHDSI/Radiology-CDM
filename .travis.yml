@@ -1,4 +1,4 @@
-langauge: generic
+langauge: r
 cache: packages
 sudo: required
 
@@ -6,9 +6,6 @@ addons:
   apt:
     packages:
       - r-base-dev
-
-script:
-  - R CMD build .
 
 r_packages:
   - devtools
@@ -25,3 +22,20 @@ r_packages:
 r_github_packages:
   - OHDSI/DatabaseConnector
   - OHDSI/SqlRender
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+before_script:
+  - wget -P ~ $CT_SAMPLE
+  - mkdir ~/signedrangeimages
+  - tar -xvf ~/signedrangeimages.tar.bz2 -C ~/signedrangeimages
+
+script:
+  - R CMD build .
+  - R CMD INSTALL *.tar.gz --library=$R_LIB_PATH
+
+after_success:
+  - Rscript tests/testRadETL.R

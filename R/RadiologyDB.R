@@ -1,6 +1,3 @@
-require(foreach)
-require(rapportools)
-
 ###################################### RadDB Class #############################################
 #' RadDB Class
 #'
@@ -25,6 +22,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
   public = list(
     initialize = function(core) {
+      # library(foreach)
+      # library(rapportools)
+
       # Parallel Processing
       private$cl <- parallel::makePSOCKcluster(core)
       doSNOW::registerDoSNOW(private$cl)
@@ -67,8 +67,8 @@ RadDB <- R6::R6Class(classname = "RadDB",
               dcmRDSk$finalize()
             }
 
-            #pID <- dcmRDS$getPatientID()
-            pID <- dcmRDS$getDirectoryID()
+            pID <- dcmRDS$getPatientID()
+            if(is.na(pID)) pID <- dcmRDS$getDirectoryID()
             coID <- 0
             dcID <- dcmRDS$getDeviceID()
             modality <- dcmRDS$getModality()
