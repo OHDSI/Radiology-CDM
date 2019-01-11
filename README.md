@@ -1,6 +1,7 @@
 # Radiology CDM ETL Module
 
 [![Build Status](https://travis-ci.com/OHDSI/Radiology-CDM.svg?branch=master)](https://travis-ci.com/OHDSI/Radiology-CDM)
+[![codecov.io](https://codecov.io/github/OHDSI/Radiology-CDM/coverage.svg?branch=master)](https://codecov.io/github/OHDSI/Radiology-CDM?branch=master)
 
 
 

@@ -1,4 +1,3 @@
-.libPaths(c(.libPaths(), Sys.getenv("R_LIB_PATH")))
 library(RadETL)
 
 # Image unpacking -> save RDS file
