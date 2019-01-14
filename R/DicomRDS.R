@@ -1,5 +1,3 @@
-library(stringr)
-
 #################################### DicomRDS Class #############################################
 #' DicomRDS Class
 #'
@@ -43,6 +41,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
   public = list(
     data = NULL,
     initialize = function(data) {
+      library(stringr)
       self$data = data
     },
 

@@ -1,14 +1,10 @@
-langauge: generic
+language: r
 cache: packages
-sudo: required
+sudo: false
 
-addons:
-  apt:
-    packages:
-      - r-base-dev
-
-script:
-  - R CMD build .
+r:
+  - 3.4.4
+  - release
 
 r_packages:
   - devtools
@@ -21,7 +17,26 @@ r_packages:
   - R6
   - parallel
   - stringr
+  - covr
 
 r_github_packages:
   - OHDSI/DatabaseConnector
   - OHDSI/SqlRender
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+before_script:
+  - wget -P ~ $CT_SAMPLE
+  - mkdir ~/signedrangeimages
+  - tar -xvf ~/signedrangeimages.tar.bz2 -C ~/signedrangeimages
+
+script:
+  - R CMD build .
+  - Rscript -e "devtools::install_git('.')"
+
+after_success:
+  - Rscript tests/testRadETL.R
+  - Rscript -e 'library(covr); codecov()'

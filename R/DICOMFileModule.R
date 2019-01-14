@@ -1,6 +1,3 @@
-require(foreach)
-require(rapportools)
-
 ################################ DcmFileModule Class #############################################
 #' DcmFileModule Class
 #'
@@ -50,6 +47,9 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
 
   public = list(
     initialize = function(path, savePathRoot, core) {
+      library(foreach)
+      library(rapportools)
+
       private$path <- path
       private$savePathRoot <- savePathRoot
 
