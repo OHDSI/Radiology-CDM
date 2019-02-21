@@ -9,7 +9,6 @@
 #'
 #' @param core Number of cores to use
 #' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
-#' @usage RadDB$new(core)
 #' @author Neon K.I.D
 #' @example Examples/RadDB_Ex.R
 #' @export
@@ -40,7 +39,6 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
       ro <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = 'rapportools', .export = private$needFunc) %dopar% {
         data <- readRDS(file = fileList[f])
-        setTxtProgressBar(pb = pb, value = f)
         Sys.sleep(0.01)
         for(i in 1:length(data)) {
           if(is.empty(data[[i]]))

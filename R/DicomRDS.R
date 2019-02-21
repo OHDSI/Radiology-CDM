@@ -6,7 +6,6 @@
 #'
 #' @param data Data frame imported from DICOM RDS file
 #' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
-#' @usage DicomRDS$new(data)
 #' @author Neon K.I.D
 #' @example Examples/DicomRDS_Ex.R
 #' @export
@@ -90,7 +89,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       size <- paste("%0", count, "d", sep = "")
       set.seed(i)
       # lets <- toupper(sample(letters,x, replace = TRUE))
-      nums <- sprintf(size, sample(1:max.val)[1:nchar(trunc(z))])
+      nums <- sprintf(size[1], sample(1:max.val)[1:nchar(trunc(z))])
       res <- paste(nums, sep = "")
       return(sum(as.numeric(res)))
     },

@@ -3,12 +3,10 @@
 #'
 #' This class is a DBMS I/O class created using the DatabaseConnector package.
 #'
-#' @param server Enter the server address to access
+#' @param server Enter the server address to access (See http://ohdsi.github.io/DatabaseConnector/reference/connect.html)
 #' @param user Enter the user ID of the DBMS you want to access
 #' @param pw Enter the password for the DBMS you want to access.
 #' @param dbms Enter the DBMS type. ex: sql server, oracle
-#'
-#' @usage DBMSIO$new(server, user, pw, dbms, port)
 #' @example Examples/DBMSio_Ex.R
 #' @author Neon K.I.D
 #' @export

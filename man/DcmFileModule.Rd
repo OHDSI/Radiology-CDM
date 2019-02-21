@@ -6,7 +6,7 @@
 \title{DcmFileModule Class}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
-DcmFileModule$new(path, savePathRoot)
+DcmFileModule
 }
 \arguments{
 \item{path}{Path with DICOM image file}
@@ -21,16 +21,19 @@ Each DICOM file is so large that it takes a lot of time to read it, and it is a 
 ############################# Example Code: Create DICOM RDS File ###################################
 
 # Path is directory folder
-path <- "/home/ohdsi/Pictures/Dicom-Images/DCM-12411"
+path <- "~/Radiology/quer.ai_test"
 
 # savePathRoot is directory folder
-savePathRoot <- "/home/ohdsi/DICOM-header"
+savePathRoot <- "~/Radiology/rds_test"
 
-DFM <- DcmFileModule$new(path = path, savePathRoot = savePathRoot)
+# Parallel core
+core <- parallel::detectCores() - 1
+
+DFM <- DcmFileModule$new(path = path, savePathRoot = savePathRoot, core = core)
 
 # rootPathCount is a parameter that determines which of the current DICOM file paths to cut.
 # If you do not want to cut this parameter, you can omit this parameter.
-DFM$dcmToRDS(rootPathCount = 4, verbose = FALSE)
+DFM$dcmToRDS(rootPathCount = 4)
 
 ######################################## Example Code: END ##########################################
 }

@@ -6,7 +6,6 @@
 #'
 #' @param path Path with DICOM image file
 #' @param savePathRoot Top path to store extracted metadata
-#' @usage DcmFileModule$new(path, savePathRoot)
 #' @author Neon K.I.D
 #' @example Examples/DICOMFileModule_Ex.R
 #' @export
