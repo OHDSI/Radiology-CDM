@@ -58,7 +58,7 @@ DcmFileModule <- R6::R6Class(classname = "DcmFileModule",
     },
 
     # All dcm files convert to RDS
-    dcmToRDS = function(rootPathCount = 1, verbose = FALSE) {
+    dcmToRDS = function(rootPathCount = 4, verbose = FALSE) {
       allList <- list.dirs(private$path, full.names = FALSE)
       writeLines('Metadata and pixeldata are combined into a single DB....')
       pb <- txtProgressBar(min = 0, max = length(allList), style = 3)
