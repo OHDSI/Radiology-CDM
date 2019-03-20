@@ -9,7 +9,7 @@ pw <- Sys.getenv("pw")
 server <- Sys.getenv("dbServer")
 
 # Choose Database name
-databaseSchema <- 'Radiology_CDM_QUER.dbo'
+databaseSchema <- 'Radiology_CDM.dbo'
 
 # Using DatabaseConnector package
 io <- DBMSIO$new(server = server, user = user, pw = pw, dbms = dbms)
