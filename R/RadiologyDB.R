@@ -9,7 +9,6 @@
 #'
 #' @param core Number of cores to use
 #' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
-#' @usage RadDB$new(core)
 #' @author Neon K.I.D
 #' @example Examples/RadDB_Ex.R
 #' @export
@@ -30,7 +29,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       doSNOW::registerDoSNOW(private$cl)
     },
 
-    createRadiologyOccurrence = function(path) {
+    createRadiologyOccurrence = function(path, idp = 2) {
       fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE, pattern = "\\.rds$")
       writeLines('Create Radiology_Occurrence Data frame....')
       pb <- txtProgressBar(min = 0, max = length(fileList), style = 3)
@@ -40,13 +39,12 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
       ro <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = 'rapportools', .export = private$needFunc) %dopar% {
         data <- readRDS(file = fileList[f])
-        setTxtProgressBar(pb = pb, value = f)
         Sys.sleep(0.01)
         for(i in 1:length(data)) {
           if(is.empty(data[[i]]))
             stop("ERROR: There is an empty value in the data frame.")
           else {
-            dcmRDS <- DicomRDS$new(data[[i]])
+            dcmRDS <- DicomRDS$new(data = data[[i]], idp)
 
             # Dirpath Settings
             # Temp code, if source code open, please modify...
@@ -61,7 +59,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
             # Searching AcquisitionDateTime...
             duringTime <- ''
             for(k in length(data):i) {
-              dcmRDSk <- DicomRDS$new(data[[k]])
+              dcmRDSk <- DicomRDS$new(data = data[[k]], idp)
               duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
               if(!is.empty(duringTime)) break else duringTime <- NA
               dcmRDSk$finalize()
@@ -80,7 +78,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
             # FALSE = Pre image
             rpcID <- "Pre Contrast"
             for(j in i:length(data)) {
-              dcmRDSj <- DicomRDS$new(data[[j]])
+              dcmRDSj <- DicomRDS$new(data[[j]], idp)
               if(dcmRDSj$isPost4BrainCT()) {
                 rpcID <- "Post Contrast"
                 break
@@ -150,7 +148,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       return(Reduce(private$mergeDfList, ro))
     },
 
-    createRadiologyImage = function(data, validpixelonly = FALSE) {
+    createRadiologyImage = function(data, validpixelonly = FALSE, idp = 2) {
       Radiology_occurrence_ID <- c()
       Person_ID <- c()
       Person_orientation_concept <- c()
@@ -176,7 +174,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
       for(i in 1:length(data)) {
         if(!is.null(data[[i]])) {
-          dcmRDS <- DicomRDS$new(data[[i]])
+          dcmRDS <- DicomRDS$new(data[[i]], idp)
           if(validpixelonly) {
             if(!dcmRDS$isPixelData())
               next

@@ -1,0 +1,29 @@
+DBMS:
+sql server
+
+Error:
+com.microsoft.sqlserver.jdbc.SQLServerException: 열 이름 'Phase_total_no'이(가) 잘못되었습니다.
+
+SQL:
+SELECT * FROM Radiology_CDM_QUER.dbo.Radiology_Occurrence WHERE Phase_total_no > 300
+
+R version:
+R version 3.4.4 (2018-03-15)
+
+Platform:
+x86_64-pc-linux-gnu
+
+Attached base packages:
+- stats
+- graphics
+- grDevices
+- utils
+- datasets
+- methods
+- base
+
+Other attached packages:
+- SqlRender (1.5.3)
+- RadETL (1.1)
+- oro.dicom (0.5.0)
+- DatabaseConnector (2.2.1)

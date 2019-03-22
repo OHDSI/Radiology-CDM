@@ -6,7 +6,6 @@
 #'
 #' @param data Data frame imported from DICOM RDS file
 #' @seealso https://github.com/OHDSI/Radiology-CDM/wiki
-#' @usage DicomRDS$new(data)
 #' @author Neon K.I.D
 #' @example Examples/DicomRDS_Ex.R
 #' @export
@@ -40,9 +39,11 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
 
   public = list(
     data = NULL,
-    initialize = function(data) {
+    idp = NULL,
+    initialize = function(data, idp = 2) {
       library(stringr)
       self$data = data
+      self$idp = idp
     },
 
     # isContrast for Brain-CT
@@ -74,7 +75,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
         substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
       )
 
-      directoryID <- self$getDirectoryID()
+      directoryID <- self$getDirectoryID(self$idp)
       i <- directoryID
       z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
 
@@ -90,7 +91,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       size <- paste("%0", count, "d", sep = "")
       set.seed(i)
       # lets <- toupper(sample(letters,x, replace = TRUE))
-      nums <- sprintf(size, sample(1:max.val)[1:nchar(trunc(z))])
+      nums <- sprintf(size[1], sample(1:max.val)[1:nchar(trunc(z))])
       res <- paste(nums, sep = "")
       return(sum(as.numeric(res)))
     },
@@ -136,10 +137,10 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getSourceID = function() return(private$getTagValue("SOPInstanceUID")),
     getPersonID = function() return(private$getTagValue("PatientID")),
     getStudyID = function() return(private$getTagValue("StudyID")),
-    getDirectoryID = function() {
+    getDirectoryID = function(idp = 2) {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
-      nVec <- unlist(stringr::str_extract_all(string = shortPath[2], pattern = "\\-*\\d+\\.*\\d*"))
+      nVec <- unlist(stringr::str_extract_all(string = shortPath[idp], pattern = "\\-*\\d+\\.*\\d*"))
       # num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
       return(as.numeric(nVec))
     },
