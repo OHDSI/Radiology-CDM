@@ -74,20 +74,21 @@ RadDB <- R6::R6Class(classname = "RadDB",
             oriID <- dcmRDS$getOrientation()
 
             # Contrast Information,,
-            # TRUE = Post image
-            # FALSE = Pre image
-            rpcID <- "Pre Contrast"
+            # Reference is RadEx v4.0
+            # 28768: Imaging without iv contrast
+            # 28771: Imaging without then with IV contrast
+            rpcID <- 28768
             for(j in i:length(data)) {
               dcmRDSj <- DicomRDS$new(data[[j]], idp)
               if(dcmRDSj$isPost4BrainCT()) {
-                rpcID <- "Post Contrast"
+                rpcID <- 28771
                 break
               }
               dcmRDSj$finalize()
             }
 
             tCount <- length(data)
-            ascID <- 4119359
+            ascID <- 6434           # is Brain CT
             imgComment <- dcmRDS$getComment()
             dosage <- dcmRDS$getDosageunit(modality = modality)
             dosageNum <- dcmRDS$getDosage(dosageUnit = dosage)
@@ -130,7 +131,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           Condition_occurrence_id,
           Device_concept_id,
           radiology_modality_concept_ID,
-          Person_orientation_concept,
+          # Person_orientation_concept,
           Person_position_concept,
           radiology_protocol_concept_id,
           Image_total_count,
@@ -191,9 +192,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
           # Contrast Information,,
           # TRUE = Post. Additional, Color format is RGB that 3D IMAGE FORMAT..
           # FALSE = Pre
-          rpcID <- "Pre Contrast"
-          if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED Image"
-          else if(dcmRDS$isPost4BrainCT()) rpcID <- "Post Contrast"
+          rpcID <- 28768
+          if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- 5901
+          else if(dcmRDS$isPost4BrainCT()) rpcID <- 28771
 
           radiology_phase_concept[num] <- rpcID
           thickness <- dcmRDS$getThickness()
