@@ -91,7 +91,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       size <- paste("%0", count, "d", sep = "")
       set.seed(i)
       # lets <- toupper(sample(letters,x, replace = TRUE))
-      nums <- sprintf(size[1], sample(1:max.val)[1:nchar(trunc(z))])
+      nums <- sprintf(ifelse(length(size) > 1, size[1], size), sample(1:max.val)[1:nchar(trunc(z))])
       res <- paste(nums, sep = "")
       return(sum(as.numeric(res)))
     },
@@ -125,21 +125,18 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getDeviceID = function() return(private$getTagValue("DeviceSerialNumber")),
     getModality = function() {
       modal <- private$getTagValue("Modality")
-      switch(modal,
-             CT = 10321,
-             MR = 10312,
-             modal)
+      if(!is.na(modal) && !is.null(modal)) switch(modal, CT = 10321, MR = 10312, modal)
+      else NA
     },
     getOrientation = function() return(private$getTagValue("PatientOrientation")),
     getPosition = function() {
       pos <- private$getTagValue("PatientPosition")
-      switch(pos,
-             HFS = 10421,
-             pos)
+      if(!is.na(pos) && !is.null(pos)) switch(pos, HFS = 10421, pos)
+      else NA
     },
 
     getComment = function() return(private$getTagValue("ImageComments")),
-    getDosageunit = function(modality) if(equals(modality, "MRI")) return("Tesla") else return("kVp"),
+    getDosageunit = function(modality) if(modality == 10312) return("Tesla") else return("kVp"),
     getDosage = function(dosageUnit) {
       sha = private$getTagValue(dosageUnit)
       if(is.empty(sha)) return(NA) else return(sha)
@@ -152,7 +149,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
       nVec <- unlist(stringr::str_extract_all(string = shortPath[self$idp], pattern = "\\-*\\d+\\.*\\d*"))
-      num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
+      num <- ifelse(length(nVec) > 1, Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2])))), nVec)
       return(as.numeric(num))
     },
     getImageType = function() {

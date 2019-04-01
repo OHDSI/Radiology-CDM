@@ -105,10 +105,10 @@ RadDB <- R6::R6Class(classname = "RadDB",
         Condition_occurrence_id <- as.integer(coID)
         Device_concept_id <- as.bigint(dcID, 4)
 
-        radiology_modality_concept_ID <- modality  # VARCHAR
-        Person_position_concept_id <- pocID           # VARCHAR -> Int
-        Person_orientation_concept <- oriID        # VARCHAR
-        radiology_protocol_concept_id <- rpcID     # This is ID but varchar now
+        radiology_modality_concept_ID <- modality  # VARCHAR -> int
+        Person_position_concept_id <- pocID        # VARCHAR -> Int
+        Person_orientation_concept <- oriID        # VARCHAR -> will deprecate
+        radiology_protocol_concept_id <- rpcID     # VARCHAR -> int
 
         Image_total_count <- as.integer(tCount)
         Anatomic_site_concept_id <- as.integer(ascID)
@@ -153,7 +153,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       Person_ID <- c()
       Person_orientation_concept <- c()
       Image_type <- c()
-      radiology_phase_concept <- c()
+      Radiology_phase_concept_id <- c()
       Image_no <- c()
       Phase_total_no <- c()
       image_resolution_Rows <- c()
@@ -195,7 +195,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- 5901
           else if(dcmRDS$isPost4BrainCT()) rpcID <- 28771
 
-          radiology_phase_concept[num] <- rpcID
+          Radiology_phase_concept_id[num] <- rpcID
           thickness <- dcmRDS$getThickness()
           Phase_total_no[num] <- 0
 
@@ -241,9 +241,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
       Radiology_Image <- data.frame(
         Radiology_occurrence_ID,
         Person_ID,
-        Person_orientation_concept,
+        # Person_orientation_concept,
         Image_type,
-        radiology_phase_concept,
+        Radiology_phase_concept_id,
         Image_no,
         Phase_total_no,
         image_resolution_Rows,
