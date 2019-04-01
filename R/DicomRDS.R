@@ -75,7 +75,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
         substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
       )
 
-      directoryID <- self$getDirectoryID(self$idp)
+      directoryID <- self$getDirectoryID()
       i <- directoryID
       z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
 
@@ -126,17 +126,16 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getModality = function() {
       modal <- private$getTagValue("Modality")
       switch(modal,
-             CT = {
-               return(10321)
-             },
-             MR = {
-               return(10312)
-             })
+             CT = 10321,
+             MR = 10312,
+             modal)
     },
     getOrientation = function() return(private$getTagValue("PatientOrientation")),
     getPosition = function() {
       pos <- private$getTagValue("PatientPosition")
-      if(pos == "HFS") return(10421) else pos
+      switch(pos,
+             HFS = 10421,
+             pos)
     },
 
     getComment = function() return(private$getTagValue("ImageComments")),
@@ -149,12 +148,12 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getSourceID = function() return(private$getTagValue("SOPInstanceUID")),
     getPersonID = function() return(private$getTagValue("PatientID")),
     getStudyID = function() return(private$getTagValue("StudyID")),
-    getDirectoryID = function(idp = 2) {
+    getDirectoryID = function() {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
-      nVec <- unlist(stringr::str_extract_all(string = shortPath[idp], pattern = "\\-*\\d+\\.*\\d*"))
-      # num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
-      return(as.numeric(nVec))
+      nVec <- unlist(stringr::str_extract_all(string = shortPath[self$idp], pattern = "\\-*\\d+\\.*\\d*"))
+      num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
+      return(as.numeric(num))
     },
     getImageType = function() {
       exType <- private$getTagValue("ImageType")

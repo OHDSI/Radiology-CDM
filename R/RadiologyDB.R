@@ -21,8 +21,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
   public = list(
     initialize = function(core) {
-      # library(foreach)
-      # library(rapportools)
+      library(foreach)
 
       # Parallel Processing
       private$cl <- parallel::makePSOCKcluster(core)
@@ -44,7 +43,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           if(is.empty(data[[i]]))
             stop("ERROR: There is an empty value in the data frame.")
           else {
-            dcmRDS <- DicomRDS$new(data = data[[i]], idp)
+            dcmRDS <- DicomRDS$new(data = data[[i]], idp = idp)
 
             # Dirpath Settings
             # Temp code, if source code open, please modify...
@@ -59,14 +58,14 @@ RadDB <- R6::R6Class(classname = "RadDB",
             # Searching AcquisitionDateTime...
             duringTime <- ''
             for(k in length(data):i) {
-              dcmRDSk <- DicomRDS$new(data = data[[k]], idp)
+              dcmRDSk <- DicomRDS$new(data = data[[k]], idp = idp)
               duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
               if(!is.empty(duringTime)) break else duringTime <- NA
               dcmRDSk$finalize()
             }
 
             pID <- dcmRDS$getPatientID()
-            if(is.na(pID)) pID <- dcmRDS$getDirectoryID()
+            if(is.na(pID) || is.character(pID)) pID <- dcmRDS$getDirectoryID()
             coID <- 0
             dcID <- dcmRDS$getDeviceID()
             modality <- dcmRDS$getModality()
@@ -107,7 +106,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
         Device_concept_id <- as.bigint(dcID, 4)
 
         radiology_modality_concept_ID <- modality  # VARCHAR
-        Person_position_concept <- pocID           # VARCHAR
+        Person_position_concept_id <- pocID           # VARCHAR -> Int
         Person_orientation_concept <- oriID        # VARCHAR
         radiology_protocol_concept_id <- rpcID     # This is ID but varchar now
 
@@ -132,7 +131,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           Device_concept_id,
           radiology_modality_concept_ID,
           # Person_orientation_concept,
-          Person_position_concept,
+          Person_position_concept_id,
           radiology_protocol_concept_id,
           Image_total_count,
           Anatomic_site_concept_id,
