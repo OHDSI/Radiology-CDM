@@ -125,7 +125,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getDeviceID = function() return(private$getTagValue("DeviceSerialNumber")),
     getModality = function() {
       modal <- private$getTagValue("Modality")
-      if(!is.na(modal) && !is.null(modal)) switch(modal, CT = 10321, MR = 10312, modal)
+      if(!is.na(modal) && !is.null(modal)) switch(modal, CT = 10321, MR = 10312, OT = 49585)
       else NA
     },
     getOrientation = function() return(private$getTagValue("PatientOrientation")),

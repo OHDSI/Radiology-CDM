@@ -76,11 +76,11 @@ RadDB <- R6::R6Class(classname = "RadDB",
             # Reference is RadEx v4.0
             # 28768: Imaging without iv contrast
             # 28771: Imaging without then with IV contrast
-            rpcID <- 28768
+            rpcID <- 10392
             for(j in i:length(data)) {
               dcmRDSj <- DicomRDS$new(data[[j]], idp)
               if(dcmRDSj$isPost4BrainCT()) {
-                rpcID <- 28771
+                rpcID <- 10371
                 break
               }
               dcmRDSj$finalize()
@@ -188,12 +188,12 @@ RadDB <- R6::R6Class(classname = "RadDB",
           imType <- dcmRDS$getImageType()
           modality <- dcmRDS$getModality()
 
-          # Contrast Information,,
-          # TRUE = Post. Additional, Color format is RGB that 3D IMAGE FORMAT..
-          # FALSE = Pre
-          rpcID <- 28768
+          # Reference is RadEx v4.0
+          # 28833: Imaging without iv contrast
+          # 28694: Imaging without then with IV contrast
+          rpcID <- 28833
           if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- 5901
-          else if(dcmRDS$isPost4BrainCT()) rpcID <- 28771
+          else if(dcmRDS$isPost4BrainCT()) rpcID <- 28694
 
           Radiology_phase_concept_id[num] <- rpcID
           thickness <- dcmRDS$getThickness()
