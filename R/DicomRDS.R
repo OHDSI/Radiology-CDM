@@ -75,7 +75,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
         substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
       )
 
-      directoryID <- self$getDirectoryID(self$idp)
+      directoryID <- self$getDirectoryID()
       i <- directoryID
       z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
 
@@ -91,7 +91,7 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
       size <- paste("%0", count, "d", sep = "")
       set.seed(i)
       # lets <- toupper(sample(letters,x, replace = TRUE))
-      nums <- sprintf(size[1], sample(1:max.val)[1:nchar(trunc(z))])
+      nums <- sprintf(ifelse(length(size) > 1, size[1], size), sample(1:max.val)[1:nchar(trunc(z))])
       res <- paste(nums, sep = "")
       return(sum(as.numeric(res)))
     },
@@ -123,12 +123,20 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
 
     getPatientID = function() return(private$getTagValue("PatientID")),
     getDeviceID = function() return(private$getTagValue("DeviceSerialNumber")),
-    getModality = function() return(private$getTagValue("Modality")),
+    getModality = function() {
+      modal <- private$getTagValue("Modality")
+      if(!is.na(modal) && !is.null(modal)) switch(modal, CT = 10321, MR = 10312, OT = 49585)
+      else NA
+    },
     getOrientation = function() return(private$getTagValue("PatientOrientation")),
-    getPosition = function() return(private$getTagValue("PatientPosition")),
+    getPosition = function() {
+      pos <- private$getTagValue("PatientPosition")
+      if(!is.na(pos) && !is.null(pos)) switch(pos, HFS = 10421, pos)
+      else NA
+    },
 
     getComment = function() return(private$getTagValue("ImageComments")),
-    getDosageunit = function(modality) if(equals(modality, "MRI")) return("Tesla") else return("kVp"),
+    getDosageunit = function(modality) if(modality == 10312) return("Tesla") else return("kVp"),
     getDosage = function(dosageUnit) {
       sha = private$getTagValue(dosageUnit)
       if(is.empty(sha)) return(NA) else return(sha)
@@ -137,12 +145,12 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     getSourceID = function() return(private$getTagValue("SOPInstanceUID")),
     getPersonID = function() return(private$getTagValue("PatientID")),
     getStudyID = function() return(private$getTagValue("StudyID")),
-    getDirectoryID = function(idp = 2) {
+    getDirectoryID = function() {
       sp <- strsplit(as.character(self$data$path[length(self$data$path)]), '/')
       shortPath <- tail(x = unlist(sp), -1)
-      nVec <- unlist(stringr::str_extract_all(string = shortPath[idp], pattern = "\\-*\\d+\\.*\\d*"))
-      # num <- Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2]))))
-      return(as.numeric(nVec))
+      nVec <- unlist(stringr::str_extract_all(string = shortPath[self$idp], pattern = "\\-*\\d+\\.*\\d*"))
+      num <- ifelse(length(nVec) > 1, Reduce(pasteNormal, c(abs(as.numeric(nVec[1])), abs(as.numeric(nVec[2])))), nVec)
+      return(as.numeric(num))
     },
     getImageType = function() {
       exType <- private$getTagValue("ImageType")

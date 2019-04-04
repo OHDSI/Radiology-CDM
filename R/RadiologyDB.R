@@ -21,8 +21,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
   public = list(
     initialize = function(core) {
-      # library(foreach)
-      # library(rapportools)
+      library(foreach)
 
       # Parallel Processing
       private$cl <- parallel::makePSOCKcluster(core)
@@ -44,7 +43,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
           if(is.empty(data[[i]]))
             stop("ERROR: There is an empty value in the data frame.")
           else {
-            dcmRDS <- DicomRDS$new(data = data[[i]], idp)
+            dcmRDS <- DicomRDS$new(data = data[[i]], idp = idp)
 
             # Dirpath Settings
             # Temp code, if source code open, please modify...
@@ -59,14 +58,14 @@ RadDB <- R6::R6Class(classname = "RadDB",
             # Searching AcquisitionDateTime...
             duringTime <- ''
             for(k in length(data):i) {
-              dcmRDSk <- DicomRDS$new(data = data[[k]], idp)
+              dcmRDSk <- DicomRDS$new(data = data[[k]], idp = idp)
               duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
               if(!is.empty(duringTime)) break else duringTime <- NA
               dcmRDSk$finalize()
             }
 
             pID <- dcmRDS$getPatientID()
-            if(is.na(pID)) pID <- dcmRDS$getDirectoryID()
+            if(is.na(pID) || is.character(pID)) pID <- dcmRDS$getDirectoryID()
             coID <- 0
             dcID <- dcmRDS$getDeviceID()
             modality <- dcmRDS$getModality()
@@ -74,20 +73,21 @@ RadDB <- R6::R6Class(classname = "RadDB",
             oriID <- dcmRDS$getOrientation()
 
             # Contrast Information,,
-            # TRUE = Post image
-            # FALSE = Pre image
-            rpcID <- "Pre Contrast"
+            # Reference is RadEx v4.0
+            # 28768: Imaging without iv contrast
+            # 28771: Imaging without then with IV contrast
+            rpcID <- 10392
             for(j in i:length(data)) {
               dcmRDSj <- DicomRDS$new(data[[j]], idp)
               if(dcmRDSj$isPost4BrainCT()) {
-                rpcID <- "Post Contrast"
+                rpcID <- 10371
                 break
               }
               dcmRDSj$finalize()
             }
 
             tCount <- length(data)
-            ascID <- 4119359
+            ascID <- 6434           # is Brain CT
             imgComment <- dcmRDS$getComment()
             dosage <- dcmRDS$getDosageunit(modality = modality)
             dosageNum <- dcmRDS$getDosage(dosageUnit = dosage)
@@ -105,10 +105,10 @@ RadDB <- R6::R6Class(classname = "RadDB",
         Condition_occurrence_id <- as.integer(coID)
         Device_concept_id <- as.bigint(dcID, 4)
 
-        radiology_modality_concept_ID <- modality  # VARCHAR
-        Person_position_concept <- pocID           # VARCHAR
-        Person_orientation_concept <- oriID        # VARCHAR
-        radiology_protocol_concept_id <- rpcID     # This is ID but varchar now
+        radiology_modality_concept_ID <- modality  # VARCHAR -> int
+        Person_position_concept_id <- pocID        # VARCHAR -> Int
+        Person_orientation_concept <- oriID        # VARCHAR -> will deprecate
+        radiology_protocol_concept_id <- rpcID     # VARCHAR -> int
 
         Image_total_count <- as.integer(tCount)
         Anatomic_site_concept_id <- as.integer(ascID)
@@ -130,8 +130,8 @@ RadDB <- R6::R6Class(classname = "RadDB",
           Condition_occurrence_id,
           Device_concept_id,
           radiology_modality_concept_ID,
-          Person_orientation_concept,
-          Person_position_concept,
+          # Person_orientation_concept,
+          Person_position_concept_id,
           radiology_protocol_concept_id,
           Image_total_count,
           Anatomic_site_concept_id,
@@ -153,7 +153,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       Person_ID <- c()
       Person_orientation_concept <- c()
       Image_type <- c()
-      radiology_phase_concept <- c()
+      Radiology_phase_concept_id <- c()
       Image_no <- c()
       Phase_total_no <- c()
       image_resolution_Rows <- c()
@@ -188,14 +188,14 @@ RadDB <- R6::R6Class(classname = "RadDB",
           imType <- dcmRDS$getImageType()
           modality <- dcmRDS$getModality()
 
-          # Contrast Information,,
-          # TRUE = Post. Additional, Color format is RGB that 3D IMAGE FORMAT..
-          # FALSE = Pre
-          rpcID <- "Pre Contrast"
-          if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- "DERIVED Image"
-          else if(dcmRDS$isPost4BrainCT()) rpcID <- "Post Contrast"
+          # Reference is RadEx v4.0
+          # 28833: Imaging without iv contrast
+          # 28694: Imaging without then with IV contrast
+          rpcID <- 28833
+          if(pmatch(x = imType, "SECONDARY", nomatch = FALSE) == 1) rpcID <- 5901
+          else if(dcmRDS$isPost4BrainCT()) rpcID <- 28694
 
-          radiology_phase_concept[num] <- rpcID
+          Radiology_phase_concept_id[num] <- rpcID
           thickness <- dcmRDS$getThickness()
           Phase_total_no[num] <- 0
 
@@ -241,9 +241,9 @@ RadDB <- R6::R6Class(classname = "RadDB",
       Radiology_Image <- data.frame(
         Radiology_occurrence_ID,
         Person_ID,
-        Person_orientation_concept,
+        # Person_orientation_concept,
         Image_type,
-        radiology_phase_concept,
+        Radiology_phase_concept_id,
         Image_no,
         Phase_total_no,
         image_resolution_Rows,

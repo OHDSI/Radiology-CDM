@@ -8,7 +8,7 @@ res <- dfm$dcmToRDS(rootPathCount = 4, verbose = FALSE)
 
 # createRadiologyOccurrence
 Rdb <- RadDB$new(core = parallel::detectCores() - 1)
-occur <- Rdb$createRadiologyOccurrence(path = savePathRoot)
+occur <- Rdb$createRadiologyOccurrence(path = savePathRoot, idp = 2)
 
 # createRadiologyImage
 files <- list.files(path = savePathRoot, pattern = '\\.rds$', full.names = TRUE, recursive = TRUE)
