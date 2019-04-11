@@ -16,24 +16,24 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     dbms = NULL,
 
     # Using DatabaseConnector for OHDSI (included JDBC)
-    connectDBMS = function(server, user, pw, dbms, port) {
+    connectDBMS = function(server, user, pw, dbms, dbS, port) {
       if(port != 0)
-        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, port = port)
+        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, schema = dbS, port = port)
       else
-        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server)
+        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, schema = dbS)
       con <- connect(connectionDetails = sql)
       return(con)
     },
 
-    convertSql = function(query) {
-      sql <- renderSql(sql = query)$sql
-      sql <- translateSql(sql = sql, targetDialect = private$dbms)$sql
+    convertSql = function(query, ohdsiSchema) {
+      sql <- render(sql = query, ohdsiSchema = ohdsiSchema)
+      sql <- translate(sql = sql, targetDialect = private$dbms)
       return(sql)
     }
   ),
 
   public = list(
-    initialize = function(server, user, pw, dbms, port = 0) {
+    initialize = function(server, user, pw, dbms, dbS, port = 0) {
       # Using DatabaseConnector for OHDSI Package
       if(!require(DatabaseConnector))
         install.packages("DatabaseConnector")
@@ -44,7 +44,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       library(SqlRender)
 
       private$dbms <- dbms
-      private$con <- private$connectDBMS(server, user, pw, dbms, port)
+      private$con <- private$connectDBMS(server, user, pw, dbms, dbS, port)
     },
 
     # [NOTICE]
@@ -54,31 +54,45 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     # Read Radiology Database table columns,,
     # occur_rows: Radiology_Occurrence.rda
     # img_rows: Radiology_Image.rda
-    insertDB = function(dbS, data, dropTableIfExists = FALSE, createTable = FALSE, tempTable = FALSE, useMppBulkLoad = FALSE, progressBar = FALSE) {
+    insertDB = function(tbS = 'dbo', data, createTable = FALSE, tempTable = FALSE, useMppBulkLoad = FALSE, progressBar = FALSE) {
       files <- list.files(path = 'resources', pattern = '\\.rda$', full.names = TRUE)
       for(i in 1:length(files))
         load(files[i])
 
-      # Using dbms is Microsoft SQL server
-      if(private$dbms == "sql server")
-        tableName <- "dbo"
-
-      if(all(colnames(data) == occur_rows))
-        tableName <- Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Occurrence'))
-      else if(all(colnames(data) == img_rows))
-        tableName <- Reduce(pasteSQL, c(dbS, tableName, 'Radiology_Image'))
-      else
-        stop("This data is not Radiology CDM \n Please check data and retry...")
+      if(all(colnames(data) == occur_cols)) {
+        tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Occurrence'))
+        writeLines(text = sprintf('Execute DDL Query for %s', tableName))
+        if(createTable) {
+          osql <- readSql(sourceFile = 'extras/ddl/Radiology_Occurrence.sql')
+          executeSql(connection = private$con, sql = private$convertSql(osql, ohdsiSchema = tbS))
+        }
+      } else if(all(colnames(data) == img_cols)) {
+        tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Image'))
+        writeLines(text = sprintf('Execute DDL Query for %s', tableName))
+        if(createTable) {
+          osql <- readSql(sourceFile = 'extras/ddl/Radiology_Image.sql')
+          executeSql(connection = private$con, sql = private$convertSql(osql, ohdsiSchema = tbS))
+        }
+      } else stop("This data is not Radiology CDM \n Please check data and retry...")
 
       writeLines(text = sprintf('Insert the %s into the database', tableName))
-      insertTable(connection = private$con,
-                  tableName = tableName,
-                  data = data,
-                  dropTableIfExists = dropTableIfExists,
-                  createTable = createTable,
-                  tempTable = tempTable,
-                  useMppBulkLoad = useMppBulkLoad,
-                  progressBar = progressBar)
+      val <- paste0(apply(data, 1, function(x) paste0("('", paste0(x, collapse = "', '"), "')")), collapse = ", ")
+      val <- gsub(x = gsub(pattern = "NA|'\\'", replacement = "NULL", val), pattern = "\\'NULL'", replacement = "NULL", val)
+      sql <- paste0("INSERT INTO ", tableName, " VALUES ", val)
+      executeSql(private$con, sql)
+    },
+
+    # [WARNING]
+    # This function DROPs all RCDMs, including Occurrence and Image.
+    dropDB = function(tbS) {
+      writeLines(text = "[WARNING]\nThis function erases all data in the RCDM ! \nThis action can not be undone.")
+      ch <- readline("Would you like to continue? [y/N]: ")
+      switch(tolower(ch), y = {
+        osql <- readSql(sourceFile = 'extras/ddl/rollback/Drop_RCDM.sql')
+        rsql <- render(sql = osql, ohdsiSchema = tbS)
+        writeLines(text = "Drop RCDM tables...")
+        executeSql(connection = private$con, sql = translate(rsql, private$dbms), progressBar = T)
+      })
     },
 
     # Using SQL for RDBMS...
