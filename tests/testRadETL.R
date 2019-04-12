@@ -8,7 +8,7 @@ res <- dfm$dcmToRDS(rootPathCount = 4, verbose = FALSE)
 
 # createRadiologyDB
 Rdb <- RadDB$new(core = parallel::detectCores() - 1)
-rcdm <- rds$createRadiologyDB(path = path, idp = 2, o_start = 1)
+rcdm <- Rdb$createRadiologyDB(path = savePathRoot, idp = 2, o_start = 1)
 
 print.data.frame(rcdm[[1]], quote = TRUE) # Occurrence
 print.data.frame(rcdm[[2]], quote = TRUE) # Image

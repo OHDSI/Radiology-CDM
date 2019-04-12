@@ -66,35 +66,35 @@ DicomRDS <- R6::R6Class(classname = "DicomRDS",
     },
 
     # Creation Radiology ID
-    createOccurrenceID = function() {
-      seriesID <- unlist(strsplit(x = private$getTagValue("SeriesInstanceUID"), split = '[.]'))
-      studyID <- unlist(strsplit(x = private$getTagValue("StudyInstanceUID"), split = '[.]'))
-
-      x <- seriesID[length(seriesID)]
-      y <- as.numeric(
-        substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
-      )
-
-      directoryID <- self$getDirectoryID()
-      i <- directoryID
-      z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
-
-      # Numbering...
-      if(nchar(x) > 7)
-        x <- as.numeric(substr(x = x, start = nchar(x) - 5, stop = nchar(x)))
-      else
-        x <- as.numeric(x)
-
-      max.val <- i + abs(y - nchar(trunc(x)) - x)
-      count <- nchar(trunc(max.val))
-
-      size <- paste("%0", count, "d", sep = "")
-      set.seed(i)
-      # lets <- toupper(sample(letters,x, replace = TRUE))
-      nums <- sprintf(ifelse(length(size) > 1, size[1], size), sample(1:max.val)[1:nchar(trunc(z))])
-      res <- paste(nums, sep = "")
-      return(sum(as.numeric(res)))
-    },
+    # createOccurrenceID = function() {
+    #   seriesID <- unlist(strsplit(x = private$getTagValue("SeriesInstanceUID"), split = '[.]'))
+    #   studyID <- unlist(strsplit(x = private$getTagValue("StudyInstanceUID"), split = '[.]'))
+    #
+    #   x <- seriesID[length(seriesID)]
+    #   y <- as.numeric(
+    #     substr(x = studyID[length(studyID)], start = nchar(studyID[length(studyID)]) - 4, stop = nchar(studyID[length(studyID)]))
+    #   )
+    #
+    #   directoryID <- self$getDirectoryID()
+    #   i <- directoryID
+    #   z <- as.numeric(substr(x = directoryID, start = nchar(directoryID) - 2, stop = nchar(directoryID)))
+    #
+    #   # Numbering...
+    #   if(nchar(x) > 7)
+    #     x <- as.numeric(substr(x = x, start = nchar(x) - 5, stop = nchar(x)))
+    #   else
+    #     x <- as.numeric(x)
+    #
+    #   max.val <- i + abs(y - nchar(trunc(x)) - x)
+    #   count <- nchar(trunc(max.val))
+    #
+    #   size <- paste("%0", count, "d", sep = "")
+    #   set.seed(i)
+    #   # lets <- toupper(sample(letters,x, replace = TRUE))
+    #   nums <- sprintf(ifelse(length(size) > 1, size[1], size), sample(1:max.val)[1:nchar(trunc(z))])
+    #   res <- paste(nums, sep = "")
+    #   return(sum(as.numeric(res)))
+    # },
 
     getStudyDate = function() return(private$getTagValue("StudyDate")),
     getStudyTime = function() return(private$getTagValue("StudyTime")),
