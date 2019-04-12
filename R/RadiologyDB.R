@@ -246,7 +246,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
       doSNOW::registerDoSNOW(private$cl)
     },
 
-    createRadiologyDB = function(path, idp = 2, o_start = 1, i_start = 1) {
+    createRadiologyDB = function(path, idp = 2, o_start = 1) {
       fileList <- list.files(path = path, recursive = T, full.names = T, pattern = "\\.rds$")
       pb <- txtProgressBar(min = 0, max = length(fileList), style = 3)
 

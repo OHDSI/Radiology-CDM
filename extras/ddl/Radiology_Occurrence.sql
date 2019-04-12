@@ -5,7 +5,7 @@ CREATE SEQUENCE @ohdsiSchema.Radiology_occur_seq
   NO CYCLE;
 
 CREATE TABLE @ohdsiSchema.Radiology_Occurrence (
-  Radiology_Occurrence_ID             BIGINT        NOT NULL CONSTRAINT RAD_OCCUR_PK PRIMARY KEY DEFAULT NEXT VALUE FOR Radiology_occur_seq,
+  Radiology_Occurrence_ID             BIGINT        NOT NULL CONSTRAINT RAD_OCCUR_PK PRIMARY KEY CONSTRAINT RAD_OCCUR_DF DEFAULT NEXT VALUE FOR Radiology_occur_seq,
   Radiology_Occurrence_date           DATE          NOT NULL,
   Radiology_Occurrence_datetime       DATETIME      NULL,
   Person_ID                           BIGINT        NOT NULL,

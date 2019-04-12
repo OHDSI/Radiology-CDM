@@ -29,6 +29,16 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       sql <- render(sql = query, ohdsiSchema = ohdsiSchema)
       sql <- translate(sql = sql, targetDialect = private$dbms)
       return(sql)
+    },
+
+    setlastOccurID = function(tbS, progressBar = F) {
+      sql <- 'SELECT coalesce(MAX(Radiology_Occurrence_ID), 1) FROM @ohdsiSchema.Radiology_Occurrence'
+      last_id <- querySql(connection = private$con, sql = private$convertSql(sql, tbS))
+
+      writeLines('Refresh Occurrence ID...')
+      sql <- 'ALTER SEQUENCE @ohdsiSchema.Radiology_occur_seq RESTART WITH @cur_id'
+      rsql <- render(sql, ohdsiSchema = tbS, cur_id = last_id[1,,] + 1)
+      executeSql(connection = private$con, sql = translate(rsql, private$dbms), progressBar = progressBar)
     }
   ),
 
@@ -80,6 +90,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       val <- gsub(x = gsub(pattern = "NA|'\\'", replacement = "NULL", val), pattern = "\\'NULL'", replacement = "NULL", val)
       sql <- paste0("INSERT INTO ", tableName, " VALUES ", val)
       executeSql(private$con, sql)
+      private$setlastOccurID(tbS, progressBar)
     },
 
     # [WARNING]
