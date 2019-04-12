@@ -52,23 +52,23 @@ readDCM <- function(path, debug = FALSE, view = FALSE) {
   }
 }
 
-convertNifti <- function(filePath) {
-  files <- list.files(path = filePath, pattern = "\\.dcm$", full.names = TRUE)
-  nifList <- NA
-
-  for(i in 1:length(files)) {
-    tryCatch({
-      img <- oro.dicom::readDICOM(path = files[i], recursive = TRUE)
-      nif <- oro.dicom::dicom2nifti(dcm = img)
-      if(is.na(nifList))
-        nifList <- nif
-      else if(length(dim(nifList)) == 3)
-        nifList <- abind::abind(nifList, nif, along = 1)
-      else if(length(dim(nifList)) == 2)
-        nifList <- abind::abind(nifList, nif, along = 0)
-    }, error = function(e) {
-      print(Reduce(pasteNormal, c("Error for ", files[i])))
-    })
-  }
-  return(nifList)
-}
+# convertNifti <- function(filePath) {
+#   files <- list.files(path = filePath, pattern = "\\.dcm$", full.names = TRUE)
+#   nifList <- NA
+#
+#   for(i in 1:length(files)) {
+#     tryCatch({
+#       img <- oro.dicom::readDICOM(path = files[i], recursive = TRUE)
+#       nif <- oro.dicom::dicom2nifti(dcm = img)
+#       if(is.na(nifList))
+#         nifList <- nif
+#       else if(length(dim(nifList)) == 3)
+#         nifList <- abind::abind(nifList, nif, along = 1)
+#       else if(length(dim(nifList)) == 2)
+#         nifList <- abind::abind(nifList, nif, along = 0)
+#     }, error = function(e) {
+#       print(Reduce(pasteNormal, c("Error for ", files[i])))
+#     })
+#   }
+#   return(nifList)
+# }

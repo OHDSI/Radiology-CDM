@@ -15,140 +15,119 @@
 RadDB <- R6::R6Class(classname = "RadDB",
   private = list(
     cl = NULL,
-    needFunc = c('as.bigint', 'as.float', 'getDate', 'pastePath'),
-    mergeDfList = function(x, y) merge(x, y, all = TRUE)
-  ),
+    needFunc = c('as.bigint', 'as.float', 'getDate', 'pastePath', 'private'),
+    needPkg = c('RadETL', 'rapportools'),
+    mergeDfList = function(x, y) merge(x, y, all = TRUE),
+    createRCDMOccurrence = function(data, ocid, idp = 2) {
+      for(i in 1:length(data)) {
+        if(is.empty(data[[i]]))
+          stop("ERROR: There is an empty value in the data frame.")
+        else {
+          dcmRDS <- DicomRDS$new(data = data[[i]], idp = idp)
 
-  public = list(
-    initialize = function(core) {
-      library(foreach)
+          # Dirpath Settings
+          # Temp code, if source code open, please modify...
+          sp <- strsplit(as.character(data[[i]]$path[1]), '/')
+          rDirPath <- head(unlist(sp), -1)
+          rDirPath <- Reduce(pastePath, rDirPath)
+          #rDirPath <- file.path(rDirPath)
 
-      # Parallel Processing
-      private$cl <- parallel::makePSOCKcluster(core)
-      doSNOW::registerDoSNOW(private$cl)
-    },
+          #roID <- dcmRDS$createOccurrenceID()
+          roID <- ocid
+          studyDatetime <- dcmRDS$getStudyDateTime()
 
-    createRadiologyOccurrence = function(path, idp = 2) {
-      fileList <- list.files(path = path, recursive = TRUE, full.names = TRUE, pattern = "\\.rds$")
-      writeLines('Create Radiology_Occurrence Data frame....')
-      pb <- txtProgressBar(min = 0, max = length(fileList), style = 3)
-
-      progress <- function(n) setTxtProgressBar(pb, n)
-      opts <- list(progress=progress)
-
-      ro <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = 'rapportools', .export = private$needFunc) %dopar% {
-        data <- readRDS(file = fileList[f])
-        Sys.sleep(0.01)
-        for(i in 1:length(data)) {
-          if(is.empty(data[[i]]))
-            stop("ERROR: There is an empty value in the data frame.")
-          else {
-            dcmRDS <- DicomRDS$new(data = data[[i]], idp = idp)
-
-            # Dirpath Settings
-            # Temp code, if source code open, please modify...
-            sp <- strsplit(as.character(data[[i]]$path[1]), '/')
-            rDirPath <- head(unlist(sp), -1)
-            rDirPath <- Reduce(pastePath, rDirPath)
-            #rDirPath <- file.path(rDirPath)
-
-            roID <- dcmRDS$createOccurrenceID()
-            studyDatetime <- dcmRDS$getStudyDateTime()
-
-            # Searching AcquisitionDateTime...
-            duringTime <- ''
-            for(k in length(data):i) {
-              dcmRDSk <- DicomRDS$new(data = data[[k]], idp = idp)
-              duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
-              if(!is.empty(duringTime)) break else duringTime <- NA
-              dcmRDSk$finalize()
-            }
-
-            pID <- dcmRDS$getPatientID()
-            if(is.na(pID) || is.character(pID)) pID <- dcmRDS$getDirectoryID()
-            coID <- 0
-            dcID <- dcmRDS$getDeviceID()
-            modality <- dcmRDS$getModality()
-            pocID <- dcmRDS$getPosition()
-            oriID <- dcmRDS$getOrientation()
-
-            # Contrast Information,,
-            # Reference is RadEx v4.0
-            # 28768: Imaging without iv contrast
-            # 28771: Imaging without then with IV contrast
-            rpcID <- 10392
-            for(j in i:length(data)) {
-              dcmRDSj <- DicomRDS$new(data[[j]], idp)
-              if(dcmRDSj$isPost4BrainCT()) {
-                rpcID <- 10371
-                break
-              }
-              dcmRDSj$finalize()
-            }
-
-            tCount <- length(data)
-            ascID <- 6434           # is Brain CT
-            imgComment <- dcmRDS$getComment()
-            dosage <- dcmRDS$getDosageunit(modality = modality)
-            dosageNum <- dcmRDS$getDosage(dosageUnit = dosage)
-            timeUnit <- "sec"
-            voID <- 0
-            break
+          # Searching AcquisitionDateTime...
+          duringTime <- ''
+          for(k in length(data):i) {
+            dcmRDSk <- DicomRDS$new(data = data[[k]], idp = idp)
+            duringTime <- dcmRDSk$getDuringTime(studyDateTime = studyDatetime)
+            if(!is.empty(duringTime)) break else duringTime <- NA
+            dcmRDSk$finalize()
           }
+
+          pID <- dcmRDS$getPatientID()
+          if(is.na(pID) || is.character(pID)) pID <- dcmRDS$getDirectoryID()
+          coID <- 0
+          dcID <- dcmRDS$getDeviceID()
+          modality <- dcmRDS$getModality()
+          pocID <- dcmRDS$getPosition()
+          oriID <- dcmRDS$getOrientation()
+
+          # Contrast Information,,
+          # Reference is RadEx v4.0
+          # 28768: Imaging without iv contrast
+          # 28771: Imaging without then with IV contrast
+          rpcID <- 10392
+          for(j in i:length(data)) {
+            dcmRDSj <- DicomRDS$new(data[[j]], idp)
+            if(dcmRDSj$isPost4BrainCT()) {
+              rpcID <- 10371
+              break
+            }
+            dcmRDSj$finalize()
+          }
+
+          tCount <- length(data)
+          ascID <- 6434           # is Brain CT
+          imgComment <- dcmRDS$getComment()
+          dosage <- dcmRDS$getDosageunit(modality = modality)
+          dosageNum <- dcmRDS$getDosage(dosageUnit = dosage)
+          timeUnit <- "sec"
+          voID <- 0
+          break
         }
-
-        radiology_occurrence_ID <- as.bigint(roID, 4)
-        radiology_occurrence_date <- as.Date(getDate(dcmRDS$getStudyDate()))
-        radiology_occurrence_datetime <- as.POSIXct(studyDatetime)
-
-        Person_ID <- as.bigint(pID, 4)
-        Condition_occurrence_id <- as.integer(coID)
-        Device_concept_id <- as.bigint(dcID, 4)
-
-        radiology_modality_concept_ID <- modality  # VARCHAR -> int
-        Person_position_concept_id <- pocID        # VARCHAR -> Int
-        Person_orientation_concept <- oriID        # VARCHAR -> will deprecate
-        radiology_protocol_concept_id <- rpcID     # VARCHAR -> int
-
-        Image_total_count <- as.integer(tCount)
-        Anatomic_site_concept_id <- as.integer(ascID)
-        radiology_Comment <- imgComment
-
-        Image_dosage_unit_concept <- dosage
-        Dosage_value_as_number <- as.numeric(dosageNum)
-        Image_exposure_time_unit_concept <- timeUnit
-        Image_exposure_time <- as.float(x = duringTime, digits = 5)
-
-        Radiology_dirpath <- rDirPath
-        Visit_occurrence_id <- as.bigint(voID, 4)
-
-        data.frame(
-          radiology_occurrence_ID,
-          radiology_occurrence_date,
-          radiology_occurrence_datetime,
-          Person_ID,
-          Condition_occurrence_id,
-          Device_concept_id,
-          radiology_modality_concept_ID,
-          # Person_orientation_concept,
-          Person_position_concept_id,
-          radiology_protocol_concept_id,
-          Image_total_count,
-          Anatomic_site_concept_id,
-          radiology_Comment,
-          Image_dosage_unit_concept,
-          Dosage_value_as_number,
-          Image_exposure_time_unit_concept,
-          Image_exposure_time,
-          Radiology_dirpath,
-          Visit_occurrence_id,
-          stringsAsFactors = FALSE
-        )
       }
-      return(Reduce(private$mergeDfList, ro))
+
+      radiology_occurrence_ID <- as.bigint(roID, 4)
+      radiology_occurrence_date <- as.Date(getDate(dcmRDS$getStudyDate()))
+      radiology_occurrence_datetime <- as.POSIXct(studyDatetime)
+
+      Person_ID <- as.bigint(pID, 4)
+      Condition_occurrence_id <- as.integer(coID)
+      Device_concept_id <- as.bigint(dcID, 4)
+
+      radiology_modality_concept_ID <- modality  # VARCHAR -> int
+      Person_position_concept_id <- pocID        # VARCHAR -> Int
+      Person_orientation_concept <- oriID        # VARCHAR -> will deprecate
+      radiology_protocol_concept_id <- rpcID     # VARCHAR -> int
+
+      Image_total_count <- as.integer(tCount)
+      Anatomic_site_concept_id <- as.integer(ascID)
+      radiology_Comment <- imgComment
+
+      Image_dosage_unit_concept <- dosage
+      Dosage_value_as_number <- as.numeric(dosageNum)
+      Image_exposure_time_unit_concept <- timeUnit
+      Image_exposure_time <- as.float(x = duringTime, digits = 5)
+
+      Radiology_dirpath <- rDirPath
+      Visit_occurrence_id <- as.bigint(voID, 4)
+
+      data.frame(
+        radiology_occurrence_ID,
+        radiology_occurrence_date,
+        radiology_occurrence_datetime,
+        Person_ID,
+        Condition_occurrence_id,
+        Device_concept_id,
+        radiology_modality_concept_ID,
+        # Person_orientation_concept,
+        radiology_protocol_concept_id,
+        Person_position_concept_id,
+        Image_total_count,
+        Anatomic_site_concept_id,
+        radiology_Comment,
+        Image_dosage_unit_concept,
+        Dosage_value_as_number,
+        Image_exposure_time_unit_concept,
+        Image_exposure_time,
+        Visit_occurrence_id,
+        Radiology_dirpath,
+        stringsAsFactors = FALSE
+      )
     },
 
-    createRadiologyImage = function(data, validpixelonly = FALSE, idp = 2) {
+    createRCDMImage = function(data, ocid, idp, validpixelonly = FALSE) {
       Radiology_occurrence_ID <- c()
       Person_ID <- c()
       Person_orientation_concept <- c()
@@ -204,7 +183,7 @@ RadDB <- R6::R6Class(classname = "RadDB",
 
           # Checking Phase number..
           if(num == 1) {
-            rID <- as.integer(dcmRDS$createOccurrenceID())
+            rID <- ocid
             curimType <- imType
             curPCID <- rpcID
           } else if(is.na(pmatch(x = rpcID, curPCID, nomatch = NA_character_))
@@ -255,6 +234,52 @@ RadDB <- R6::R6Class(classname = "RadDB",
         stringsAsFactors = FALSE
       )
       return(Radiology_Image)
+    }
+  ),
+
+  public = list(
+    initialize = function(core) {
+      library(foreach)
+
+      # Parallel Processing
+      private$cl <- parallel::makePSOCKcluster(core)
+      doSNOW::registerDoSNOW(private$cl)
+    },
+
+    createRadiologyDB = function(path, idp = 2, o_start = 1) {
+      fileList <- list.files(path = path, recursive = T, full.names = T, pattern = "\\.rds$")
+      pb <- txtProgressBar(min = 0, max = length(fileList), style = 3)
+
+      progress <- function(n) setTxtProgressBar(pb, n)
+      opts <- list(progress=progress)
+
+      # Occurrence
+      ro <- data.frame()
+      writeLines('Create Radiology Occurrence Data frame....')
+      ocid <- o_start - 1
+      ro <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = private$needPkg, .export = private$needFunc) %dopar% {
+        data <- readRDS(file = fileList[f])
+        Sys.sleep(0.01)
+
+        ocid <- ocid + f
+        private$createRCDMOccurrence(data = data, ocid = ocid, idp = idp)
+      }
+      res_ocur <- Reduce(private$mergeDfList, ro)
+
+      # Image
+      ri <- data.frame()
+      writeLines('Create Radiology Image Data frame....')
+      ocid <- o_start - 1
+      ri <- foreach(f = 1:length(fileList), .options.snow = opts, .packages = private$needPkg, .export = private$needFunc) %dopar% {
+        data <- readRDS(file = fileList[f])
+        Sys.sleep(0.01)
+
+        ocid <- ocid + f
+        private$createRCDMImage(data = data, ocid = ocid, idp = idp)
+      }
+      res_img <- Reduce(private$mergeDfList, ri)
+
+      return(list(res_ocur, res_img))
     },
 
     finalize = function() {
