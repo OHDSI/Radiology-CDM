@@ -1,1 +1,1 @@
-ALTER SEQUENCE @ohdsiSchema.Radiology_occur_seq RESTART WITH @cur_id;
+SELECT setval('@ohdsiSchema.Radiology_occur_seq', coalesce(max(Radiology_Occurrence_ID), 1)) FROM @ohdsiSchema.Radiology_Occurrence;
