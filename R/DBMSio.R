@@ -32,13 +32,13 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     },
 
     setlastOccurID = function(tbS, progressBar = F) {
-      sql <- 'SELECT coalesce(MAX(Radiology_Occurrence_ID), 1) FROM @ohdsiSchema.Radiology_Occurrence'
-      last_id <- querySql(connection = private$con, sql = private$convertSql(sql, tbS))
+      sql <- readSql(sourceFile = paste0('extras/migration/', self$dbms, 'getMaxOccurID.sql'))
+      last_id <- querySql(connection = private$con, sql = sql)
 
       writeLines('Refresh Occurrence ID...')
-      sql <- 'ALTER SEQUENCE @ohdsiSchema.Radiology_occur_seq RESTART WITH @cur_id'
+      sql <- readSql(sourceFile = paste0('extras/migration/', self$dbms, 'setNewOccurID.sql'))
       rsql <- render(sql, ohdsiSchema = tbS, cur_id = last_id[1,,] + 1)
-      executeSql(connection = private$con, sql = translate(rsql, private$dbms), progressBar = progressBar)
+      executeSql(connection = private$con, sql = rsql, progressBar = progressBar)
     }
   ),
 
@@ -73,14 +73,14 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Occurrence'))
         writeLines(text = sprintf('Execute DDL Query for %s', tableName))
         if(createTable) {
-          osql <- readSql(sourceFile = 'extras/ddl/Radiology_Occurrence.sql')
+          osql <- readSql(sourceFile = paste0('extras/ddl/', self$dbms, 'Radiology_Occurrence.sql'))
           executeSql(connection = private$con, sql = private$convertSql(osql, ohdsiSchema = tbS))
         }
       } else if(all(colnames(data) == img_cols)) {
         tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Image'))
         writeLines(text = sprintf('Execute DDL Query for %s', tableName))
         if(createTable) {
-          osql <- readSql(sourceFile = 'extras/ddl/Radiology_Image.sql')
+          osql <- readSql(sourceFile = paste0('extras/ddl/', self$dbms, 'Radiology_Occurrence.sql'))
           executeSql(connection = private$con, sql = private$convertSql(osql, ohdsiSchema = tbS))
         }
       } else stop("This data is not Radiology CDM \n Please check data and retry...")
@@ -99,7 +99,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       writeLines(text = "[WARNING]\nThis function erases all data in the RCDM ! \nThis action can not be undone.")
       ch <- readline("Would you like to continue? [y/N]: ")
       switch(tolower(ch), y = {
-        osql <- readSql(sourceFile = 'extras/ddl/rollback/Drop_RCDM.sql')
+        osql <- readSql(sourceFile = paste0('extras/ddl/', self$dbms, 'rollback/Drop_RCDM.sql'))
         rsql <- render(sql = osql, ohdsiSchema = tbS)
         writeLines(text = "Drop RCDM tables...")
         executeSql(connection = private$con, sql = translate(rsql, private$dbms), progressBar = T)
