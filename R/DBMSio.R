@@ -80,7 +80,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Image'))
         writeLines(text = sprintf('Execute DDL Query for %s', tableName))
         if(createTable) {
-          osql <- readSql(sourceFile = paste0('extras/ddl/', self$dbms, 'Radiology_Occurrence.sql'))
+          osql <- readSql(sourceFile = paste0('extras/ddl/', self$dbms, 'Radiology_Image.sql'))
           executeSql(connection = private$con, sql = private$convertSql(osql, ohdsiSchema = tbS))
         }
       } else stop("This data is not Radiology CDM \n Please check data and retry...")
