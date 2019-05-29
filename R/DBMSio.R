@@ -67,10 +67,6 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     # occur_rows: Radiology_Occurrence.rda
     # img_rows: Radiology_Image.rda
     insertDB = function(tbS = 'dbo', data, createTable = FALSE, tempTable = FALSE, useMppBulkLoad = FALSE, progressBar = FALSE) {
-      files <- list.files(path = system.file('data', package = 'RadETL'), pattern = '\\.rda$', full.names = TRUE)
-      for(i in 1:length(files))
-        load(files[i])
-
       if(all(colnames(data) == occur_cols)) {
         tableName <- Reduce(pasteSQL, c(tbS, 'Radiology_Occurrence'))
         writeLines(text = sprintf('Execute DDL Query for %s', tableName))
