@@ -39,5 +39,5 @@ script:
 
 after_success:
   - Rscript tests/testRadETL.R
-  - cat custom.log
+  - cat /tmp/radiologyDB.log
   - Rscript -e 'library(covr); codecov()'
