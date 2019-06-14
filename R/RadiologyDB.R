@@ -238,11 +238,14 @@ RadDB <- R6::R6Class(classname = "RadDB",
   ),
 
   public = list(
-    initialize = function(core, log = 'radiologyDB.log') {
+    initialize = function(core, logfile = NA) {
       library(foreach)
 
+      if(is.na(logfile))
+        logfile <- switch(getOS(), cpm = 'C:/TEMP/radiologyDB.log', '/tmp/radiologyDB.log')
+
       # Parallel Processing
-      private$cl <- parallel::makePSOCKcluster(core, outfile = log)
+      private$cl <- parallel::makePSOCKcluster(core, outfile = logfile)
       doSNOW::registerDoSNOW(private$cl)
     },
 
