@@ -238,11 +238,11 @@ RadDB <- R6::R6Class(classname = "RadDB",
   ),
 
   public = list(
-    initialize = function(core) {
+    initialize = function(core, log = 'radiologyDB.log') {
       library(foreach)
 
       # Parallel Processing
-      private$cl <- parallel::makePSOCKcluster(core)
+      private$cl <- parallel::makePSOCKcluster(core, outfile = log)
       doSNOW::registerDoSNOW(private$cl)
     },
 
