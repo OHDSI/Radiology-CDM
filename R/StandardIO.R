@@ -52,3 +52,16 @@ as.bigint <- function(x, scipen) {
   ret <- as.numeric(x)
   return(ret)
 }
+
+getOS <- function() {
+  sysinf <- Sys.info()
+  if(!is.null(sysinf)) {
+    os <- sysinf['sysname']
+    switch(os, Darwin = 'osx', Linux = 'Linux', 'cpm')
+  } else {
+    os <- .Platform$OS.type
+    if(grepl("^darwin", R.version$os)) os <- 'osx'
+    else if(grepl("^linux-gnu", R.version$os)) os <- 'Linux'
+    else os <- 'cpm'
+  }
+}
