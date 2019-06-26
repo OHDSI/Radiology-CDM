@@ -26,12 +26,12 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     },
 
     translateSql = function(query) {
-      translate(sql = sql, targetDialect = private$dbms)
+      translate(sql = query, targetDialect = private$dbms)
     },
 
     convertSql = function(query, ohdsiSchema) {
       sql <- render(sql = query, ohdsiSchema = ohdsiSchema)
-      sql <- private$translateSql(sql = sql, targetDialect = private$dbms)
+      sql <- private$translateSql(query = sql)
       return(sql)
     },
 
