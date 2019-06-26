@@ -119,15 +119,15 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         sql <- paste0("SELECT * FROM ", tb)
       else
         sql <- paste0("SELECT * FROM ", tb, " WHERE ", condition)
-      return(querySql(connection = private$con, sql = private$convertSql(query = sql)))
+      return(querySql(connection = private$con, sql = private$translateSql(query = sql)))
     },
 
     executeSql = function(sql) {
-      executeSql(connection = private$con, sql = private$convertSql(query = sql))
+      executeSql(connection = private$con, sql = private$translateSql(query = sql))
     },
 
     querySql = function(sql) {
-      querySql(connection = private$con, sql = private$convertSql(query = sql))
+      querySql(connection = private$con, sql = private$translateSql(query = sql))
     },
 
     finalize = function() disconnect(private$con)
