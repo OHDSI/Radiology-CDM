@@ -118,6 +118,14 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       return(querySql(connection = private$con, sql = private$convertSql(query = sql)))
     },
 
+    executeSql = function(sql) {
+      executeSql(connection = private$con, sql = private$convertSql(query = sql))
+    },
+
+    querySql = function(sql) {
+      querySql(connection = private$con, sql = private$convertSql(query = sql))
+    },
+
     finalize = function() disconnect(private$con)
   )
 )
