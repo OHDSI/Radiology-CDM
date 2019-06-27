@@ -16,18 +16,22 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
     dbms = NULL,
 
     # Using DatabaseConnector for OHDSI (included JDBC)
-    connectDBMS = function(server, user, pw, dbms, dbS, port) {
+    connectDBMS = function(server, user, pw, dbms, port) {
       if(port != 0)
-        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, schema = dbS, port = port)
+        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, port = port)
       else
-        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server, schema = dbS)
+        sql <- createConnectionDetails(dbms = dbms, user = user, password = pw, server = server)
       con <- connect(connectionDetails = sql)
       return(con)
     },
 
+    translateSql = function(query) {
+      translate(sql = query, targetDialect = private$dbms)
+    },
+
     convertSql = function(query, ohdsiSchema) {
       sql <- render(sql = query, ohdsiSchema = ohdsiSchema)
-      sql <- translate(sql = sql, targetDialect = private$dbms)
+      sql <- private$translateSql(query = sql)
       return(sql)
     },
 
@@ -45,7 +49,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
   ),
 
   public = list(
-    initialize = function(server, user, pw, dbms, dbS, port = 0) {
+    initialize = function(server, user, pw, dbms, port = 0) {
       # Using DatabaseConnector for OHDSI Package
       if(!require(DatabaseConnector))
         install.packages("DatabaseConnector")
@@ -56,7 +60,7 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
       library(SqlRender)
 
       private$dbms <- dbms
-      private$con <- private$connectDBMS(server, user, pw, dbms, dbS, port)
+      private$con <- private$connectDBMS(server, user, pw, dbms, port)
     },
 
     # [NOTICE]
@@ -115,7 +119,15 @@ DBMSIO <- R6::R6Class(classname = "DBMSIO",
         sql <- paste0("SELECT * FROM ", tb)
       else
         sql <- paste0("SELECT * FROM ", tb, " WHERE ", condition)
-      return(querySql(connection = private$con, sql = private$convertSql(query = sql)))
+      return(querySql(connection = private$con, sql = private$translateSql(query = sql)))
+    },
+
+    executeSql = function(sql) {
+      executeSql(connection = private$con, sql = private$translateSql(query = sql))
+    },
+
+    querySql = function(sql) {
+      querySql(connection = private$con, sql = private$translateSql(query = sql))
     },
 
     finalize = function() disconnect(private$con)
