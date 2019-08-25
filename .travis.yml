@@ -34,6 +34,7 @@ before_script:
   - tar -xvf ~/signedrangeimages.tar.bz2 -C ~/signedrangeimages
 
 script:
+  - cd ./archives/radETL
   - R CMD build .
   - Rscript -e "devtools::install_git('.')"
 
