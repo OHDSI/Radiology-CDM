@@ -1,0 +1,3 @@
+ignore:
+  - "R/DBMSio.R"
+  - "R/StandardIO.R"

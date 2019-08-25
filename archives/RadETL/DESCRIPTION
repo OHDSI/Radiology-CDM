@@ -1,0 +1,24 @@
+Package: RadETL
+Title: Radiology CDM ETL Module (one line, title case)
+Version: 1.1
+Authors@R: person("K.I.D", "Neon", email = "contact@neonkid.xyz", role = c("aut", "cre"))
+Description: Dicom Header Extraction Package.
+Depends: 
+  DatabaseConnector,
+  R (>= 3.4.4)
+Imports:
+  oro.dicom,
+  oro.nifti,
+  dplyr,
+  rapportools,
+  R6,
+  foreach,
+  stringr,
+  doSNOW,
+  parallel
+License: Apache 2.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Suggests: 
+    covr
