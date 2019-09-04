@@ -17,9 +17,17 @@ The main functions include the Pre and Post identification algorithms of CT and 
 
 ![RCDM-ETL_Process](images/RCDM-ETL_Process.png)
 
-Radiology-CDM extracts Metadata and Pixeldata from DICOM file, which is the original radiology image, and combines the data required for RCDM and stores it in DB format and converts it into CDM. 
+- Radiology-CDM extracts Metadata and Pixeldata from DICOM file, which is the original radiology image, and combines the data required for RCDM and stores it in DB format and converts it into CDM.
 
+- Just copy and paste this code into your Rstudio!<br> All you have to do is just change 'path' and 'core' in DICOMHeaderList function.<br>RadiologyCDM function will read all of the DICOM files under the 'path' you've specified. <br>Now check the variable 'Radiology_Image_Table' and, 'Radiology_Occurrence_Table'!
 
+```R
+devtools::install_github('ABMI/RadiogyCDM')<br>
+library(RadiogyCDM)<br>
+DICOMList<-DICOMHeaderList('path to DICOM files', core = 4)<br>
+Radiology_Image_Table<-radiologyImageTable(DICOMList)<br>
+Radiology_Occurrence_Table<-radiologyOccurrenceTable(DICOMList)
+```
 
 ## Extraction sequence
 
@@ -35,4 +43,3 @@ Documents and examples in the RadETL package can be loaded into the class and fu
 ```R
 ?DBMSIO
 ```
-
