@@ -21,8 +21,6 @@ radiologyOccurrenceTable<-function(DICOMList){
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiationDosage(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiationExposureTime(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiologyProtocolConceptId(DICOMList), by='radiologyOccurrenceId', all=T)
-    radiologyOccurrenceTable<-cbind(radiologyOccurrenceTable, conditionOccurrenceId(DICOMList))
-    radiologyOccurrenceTable<-cbind(radiologyOccurrenceTable, visitOccurrenceId(DICOMList))
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, imageTotalCount(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiologyDirpath(DICOMList), by='radiologyOccurrenceId', all=T)
     return(radiologyOccurrenceTable)
