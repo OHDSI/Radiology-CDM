@@ -23,7 +23,7 @@ radiologyOccurrenceDateTime<-function(DICOMList){
         colnames(studyTimeDf)<-'studyTime'
         studyDateTimeDf<-merge(studyDateDf, studyTimeDf, all=T)
         studyDateTimeDf<-studyDateTimeDf %>% mutate(studyDateTime=paste(studyDate,studyTime, sep = ''))
-        studyDateTimeDf<-studyDateTimeDf %>% mutate(studyDateTime=ifelse(is.na(as.POSIXct(studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC"))==F, as.character(as.POSIXct(studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC")), as.character(as.POSIXct(date, format = '%Y%m%d',origin = "1970-01-01",tz ="UTC"))))
+        studyDateTimeDf<-studyDateTimeDf %>% mutate(studyDateTime=ifelse(is.na(as.POSIXct(studyDateTimeDf$studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC"))==F, as.character(as.POSIXct(studyDateTimeDf$studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC")), as.character(as.POSIXct(studyDateTimeDf$studyDate, format = '%Y%m%d',origin = "1970-01-01",tz ="UTC"))))
         studyDateTimeDf<-studyDateTimeDf[,c(3)]
         studyDateTimeDf<-data.frame(studyDateTimeDf)
         colnames(studyDateTimeDf)<-'studyDateTime'

@@ -24,6 +24,9 @@ The main functions include the Pre and Post identification algorithms of CT and 
 ```R
 devtools::install_github('ABMI/Radiology-CDM')
 library(RadiologyCDM)
+library(dplyr)
+library(ParallelLogger)
+library(digest)
 DICOMList<-DICOMHeaderList('path to DICOM files', core = 4)
 Radiology_Image_Table<-radiologyImageTable(DICOMList)
 Radiology_Occurrence_Table<-radiologyOccurrenceTable(DICOMList)
