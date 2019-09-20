@@ -17,8 +17,13 @@
 #modality
 modality<-function(DICOMList){
     modality<-lapply(DICOMList, function(x){
-        modality<-as.character(x[[1]] %>% filter(name=='Modality') %>% select(value))})
+        modality<-as.character(x[[1]] %>% filter(name=='Modality') %>% select(value))
+        if(modality=="CR" | modality=="DX"){
+            modality='XR'
+        }
+        return(modality)})
     modality<-as.data.frame(do.call(rbind, modality))
     colnames(modality)<-'modality'
     return(modality)
 }
+
