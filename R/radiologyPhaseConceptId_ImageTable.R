@@ -52,14 +52,32 @@ radiologyPhaseConceptId<-function(DICOMList){
         else if(grepl('PRIMARY', x$imageType)==T & grepl('pre', tolower(x$seriesDescription))==T){
             return('28833')
         }
-        else if(grepl('PRIMARY', x$imageType)==T & grepl('arterial', tolower(x$seriesDescription))==T){
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('post', tolower(x$seriesDescription))==T){
+            return('28694')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('art', tolower(x$seriesDescription))==T){
             return('11080')
         }
-        else if(grepl('PRIMARY', x$imageType)==T & grepl('portal', tolower(x$seriesDescription))==T){
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('por', tolower(x$seriesDescription))==T){
             return('11085')
         }
-        else if(grepl('PRIMARY', x$imageType)==T & grepl('delay', tolower(x$seriesDescription))==T){
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('del', tolower(x$seriesDescription))==T){
             return('11081')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('T1', x$seriesDescription)==T){
+            return('T1')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('T2', x$seriesDescription)==T){
+            return('T2')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('DW', x$seriesDescription)==T){
+            return('DWI')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('FLAIR', x$seriesDescription)==T){
+            return('FLAIR')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('Apparent', x$seriesDescription)==T){
+            return('Apparent Diffusion Coefficient')
         }
         else if(grepl('PRIMARY', x$imageType)==T & grepl('NA', x$contastBolusAgent)==T){
             return('28833')

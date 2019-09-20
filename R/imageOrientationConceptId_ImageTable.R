@@ -25,8 +25,26 @@ imageOrientationConceptId<-function(DICOMList){
             else if(grepl('chest', tolower(imageOrientationConceptIdDf))==T&grepl('L F', imageOrientationConceptIdDf)==T){
                 return('43594')
             }
+            else if(grepl('chest', tolower(imageOrientationConceptIdDf))==T){
+                return('43594')
+            }
             else if(grepl('axial', tolower(imageOrientationConceptIdDf))==T){
                 return('10514')
+            }
+            else if(grepl('AX', imageOrientationConceptIdDf)==T){
+                return('10514')
+            }
+            else if(grepl('DW', imageOrientationConceptIdDf)==T){
+                return('10514')
+            }
+            else if(grepl('FLAIR', imageOrientationConceptIdDf)==T){
+                return('10514')
+            }
+            else if(grepl('Apparent', imageOrientationConceptIdDf)==T){
+                return('10514')
+            }
+            else if(grepl('SA', imageOrientationConceptIdDf)==T){
+                return('sagittal')
             }
             else{
                 return('others')

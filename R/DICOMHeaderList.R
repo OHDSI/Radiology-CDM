@@ -21,12 +21,5 @@ DICOMHeaderList<-function(DICOMFolderPath, core=4){
         return(FileMetadata$hdr[1])},
         error= function(e) print('This_DICOM_cannot_be_read_by_oro.dicom_package'))
     })
-    for(i in 1:length(result)){
-        if ((result[i]=="This_DICOM_cannot_be_read_by_oro.dicom_package")==T){
-            errorfile<-sprintf('%d th DICOM file cannot be read by oro.dicom package', i)
-            result[[i]]<-NULL
-        }
-    }
     return(result)
-    print(errorfile)
 }

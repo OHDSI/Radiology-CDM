@@ -9,6 +9,9 @@ anatomicRegion<-function(DICOMList){
             else if(grepl('head', tolower(anatomicRegion))==T){
                 return('head')
             }
+            else if(grepl('brain', tolower(anatomicRegion))==T){
+                return('head')
+            }
             else if(grepl('neck', tolower(anatomicRegion))==T){
                 return('neck')
             }
@@ -26,4 +29,3 @@ anatomicRegion<-function(DICOMList){
     anatomicRegion<-do.call(rbind, anatomicRegion)
     return(anatomicRegion)
 }
-
