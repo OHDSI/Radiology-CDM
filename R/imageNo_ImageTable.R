@@ -15,7 +15,7 @@
 #' @export
 
 imageNo<-function(DICOMList){
-    imageNo<-do.call(rbind,mapply(FUN = cbind,imageId(DICOMList),radiologyOccurrenceId(DICOMList), radiologyPhaseConceptId(DICOMList), SIMPLIFY = FALSE))
+    imageNo<-cbind(imageId(DICOMList),radiologyOccurrenceId(DICOMList), radiologyPhaseConceptId(DICOMList))
     imageNo<-imageNo%>%dplyr::group_by(radiologyOccurrenceId, radiologyPhaseConceptId)%>%dplyr::mutate(imageNo=row_number())
     imageNo<-imageNo%>%dplyr::group_by(radiologyOccurrenceId, radiologyPhaseConceptId)%>%dplyr::mutate(phaseTotalNo=n())
     imageNo<-imageNo[, c(1, 4, 5)]

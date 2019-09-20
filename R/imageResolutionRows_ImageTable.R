@@ -14,8 +14,11 @@
 #' imageResolutionRows(DICOMList)
 #' @export
 
-imageResolutionRows<-function(DICOMList){lapply(DICOMList, function(x){
-    imageResolutionRowsDf<-x[[1]] %>% dplyr::filter(name=='Rows') %>% dplyr::select(value)
-    colnames(imageResolutionRowsDf)<-'imageResolutionRows'
-    return(imageResolutionRowsDf)
-})}
+imageResolutionRows<-function(DICOMList){
+    imageResolutionRows<-lapply(DICOMList, function(x){
+        imageResolutionRowsDf<-x[[1]] %>% dplyr::filter(name=='Rows') %>% dplyr::select(value)
+        colnames(imageResolutionRowsDf)<-'imageResolutionRows'
+        return(imageResolutionRowsDf)
+    })
+    return(do.call(rbind, imageResolutionRows))
+}

@@ -15,6 +15,9 @@
 #' @export
 
 DicomPath<-function(DICOMList){
-    lapply(DICOMList, function(x){
+    DicomPath<-lapply(DICOMList, function(x){
         data.frame(Dicompath=names(x))
-    })}
+    })
+    return(do.call(rbind,DicomPath))
+}
+

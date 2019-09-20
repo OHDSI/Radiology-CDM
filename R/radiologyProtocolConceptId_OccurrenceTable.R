@@ -1,6 +1,6 @@
 #' 'radiologyProtocolConceptId'
 #'
-#' radiologyProtocolConceptId function indicates protocol of each shoot
+#' radiologyProtocolConceptId function indicates protocol&modality of each shoot
 #'
 #'
 #' @param DICOMList you can put it like this and then run the function : DICOMList<-DICOMHeaderList(DICOMFolderPath)
@@ -8,55 +8,62 @@
 #' @importFrom magrittr "%>%"
 #'
 #'
-#' @return A dataframe indicating path protocol of each shoot
+#' @return A dataframe indicating path protocol&modality of each shoot
 #' @examples
 #' DICOMList<-DICOMHeaderList(DICOMFolderPath)
 #' radiologyProtocolConceptId(DICOMList)
 #' @export
 
 ##radiologyProtocolConceptId(BodyPartExamined, StudyDescription, radiologyPhaseConceptId, modality)
+
 radiologyProtocolConceptId<-function(DICOMList){
-    anatomicSite<-lapply(DICOMList, function(x){
-        anatomicSite<-x[[1]]%>%filter(name %in% c('BodyPartExamined', 'StudyDescription')) %>% select(name, value)
-        anatomicSite<-anatomicSite %>% filter(value!='')
-        anatomicSite<-ifelse(any(anatomicSite$name=='BodyPartExamined')==T, anatomicSite %>% filter(name=='BodyPartExamined') %>% select(value), anatomicSite %>% filter(name=='StudyDescription') %>% select(value))
-        anatomicSite<-as.data.frame(anatomicSite)
-        colnames(anatomicSite)<-'anatomicSite'
-        anatomicSite$anatomicSite<-ifelse(tolower(anatomicSite$anatomicSite)=='head', 'head', ifelse(tolower(anatomicSite$anatomicSite)=='neck', 'neck', anatomicSite$anatomicSite))
-        return(anatomicSite)
+    information<-cbind(anatomicRegion(DICOMList), radiologyOccurrenceId(DICOMList), modality(DICOMList), radiologyPhaseConceptId(DICOMList), imageOrientationConceptId(DICOMList))
+    information<-unique(information)
+    information<-split(information, information$radiologyOccurrenceId)
+    information<-lapply(information, function(x){
+        anatomicRegion<-data.frame(paste(unique(x$anatomicRegion), collapse=', '), row.names = NULL)
+        colnames(anatomicRegion)<-'anatomicRegion'
+        radiologyOccurrenceId<-data.frame(paste(unique(x$radiologyOccurrenceId), collapse=', '), row.names = NULL)
+        colnames(radiologyOccurrenceId)<-'radiologyOccurrenceId'
+        radiologyPhaseConceptId<-data.frame(paste(unique(x$radiologyPhaseConceptId), collapse=', '), row.names = NULL)
+        colnames(radiologyPhaseConceptId)<-'radiologyPhaseConceptId'
+        modality<-data.frame(paste(unique(x$modality), collapse=', '), row.names = NULL)
+        colnames(modality)<-'modality'
+        imageOrientationConceptId<-data.frame(paste(unique(x$imageOrientationConceptId), collapse=', '), row.names = NULL)
+        colnames(imageOrientationConceptId)<-'imageOrientationConceptId'
+        return(cbind(anatomicRegion, radiologyOccurrenceId, radiologyPhaseConceptId, modality, imageOrientationConceptId))})
+    radiologyProtocolConceptId<-sapply(information, function(x){
+        if(grepl('chest', x$anatomicRegion)==T & grepl('DX', x$modality)==T & grepl('43591', x$imageOrientationConceptId)==T & grepl('43594', x$imageOrientationConceptId)==T){
+            return('3031526')
+        }
+        else if(grepl('chest', x$anatomicRegion)==T & grepl('CR', x$modality)==T & grepl('43591', x$imageOrientationConceptId)==T & grepl('43594', x$imageOrientationConceptId)==T){
+            return('3031526')
+        }
+        else if(grepl('chest', x$anatomicRegion)==T & grepl('DX', x$modality)==T & grepl('43594', x$imageOrientationConceptId)==T){
+            return('3002676')
+        }
+        else if(grepl('chest', x$anatomicRegion)==T & grepl('CR', x$modality)==T & grepl('43594', x$imageOrientationConceptId)==T){
+            return('3002676')
+        }
+        else if(grepl('head', x$anatomicRegion)==T & grepl('CT', x$modality)==T & grepl('5901', x$radiologyPhaseConceptId)==T){
+            return('36305291')
+        }
+        else if(grepl('head', x$anatomicRegion)==T & grepl('CT', x$modality)==T & grepl('28694', x$radiologyPhaseConceptId)==T){
+            return('3002086')
+        }
+        else if(grepl('head', x$anatomicRegion)==T & grepl('CT', x$modality)==T & grepl('28833', x$radiologyPhaseConceptId)==T){
+            return('3025779')
+        }
+        else if(grepl('neck', x$anatomicRegion)==T & grepl('CT', x$modality)==T & grepl('28694', x$radiologyPhaseConceptId)==T){
+            return('36304600')
+        }
+        else if(grepl('abdomen', x$anatomicRegion)==T & grepl('CT', x$modality)==T & grepl('28833', x$radiologyPhaseConceptId)==T & grepl('11080', x$radiologyPhaseConceptId)==T & grepl('11085', x$radiologyPhaseConceptId)==T & grepl('11081', x$radiologyPhaseConceptId)==T){
+            return('21492176')
+        }
+        else {
+            return('others')
+        }
     })
-    radiologyProtocolConceptId<-mapply(function(x, y) merge(x, y, by=0, all = T), x = anatomicSite, y = radiologyOccurrenceId(DICOMList), SIMPLIFY = F)
-    radiologyProtocolConceptId<-mapply(function(x, y) merge(x, y, all = T), x = radiologyProtocolConceptId, y = radiologyPhaseConceptId(DICOMList), SIMPLIFY = F)
-    radiologyProtocolConceptId<-do.call(rbind, radiologyProtocolConceptId)
-    radiologyProtocolConceptId<-radiologyProtocolConceptId[,c(2:4)]
-    modalityElement<-modality(DICOMList)
-    modalityElement<-split(modalityElement, modalityElement$radiologyOccurrenceId)
-    radiologyProtocolConceptId<-split(radiologyProtocolConceptId, radiologyProtocolConceptId$radiologyOccurrenceId)
-    modality<-lapply(modalityElement, function(x){
-        as.character(x$modality)
-    })
-
-    anatomicSite<-lapply(radiologyProtocolConceptId, function(x){
-        anatomicSite<-unique(x$anatomicSite)
-        anatomicSite<-paste0(anatomicSite, collapse=', ')
-    })
-
-    radiologyPhaseConceptId<-lapply(radiologyProtocolConceptId, function(x){
-        radiologyPhaseConceptId<-paste(unique(x$radiologyPhaseConceptId), sep=',')
-        paste0(radiologyPhaseConceptId, collapse=', ')
-    })
-
-    radiologyProtocolConceptId<-mapply(FUN = c, modality, anatomicSite, radiologyPhaseConceptId, SIMPLIFY = F)
-    radiologyProtocolConceptId<-lapply(radiologyProtocolConceptId, function(x){
-        paste0(x, collapse=', ')
-    })
-    radiologyProtocolConceptId<-lapply(radiologyProtocolConceptId, function(x){
-        if (grepl('CT', x)==T & grepl('head', x)==T & grepl('5901', x)==T) {return('3002086')}
-        else if (grepl('CT', x)==T & grepl('head', x)==T & grepl('28694', x)==T) {return('3002086')}
-        else if (grepl('CT', x)==T & grepl('head', x)==T & grepl('28833', x)==T) {return('3025779')}
-        else if(grepl('CT', x)==T & grepl('neck', x)==T & grepl('28833', x)==T) {return('3050247')}
-        else {return('needMapping')}
-    }
-    )
-    data.frame(radiologyOccurrenceId=names(radiologyProtocolConceptId), radiologyProtocolConceptId=as.data.frame(t(do.call(cbind, radiologyProtocolConceptId)))$V1, row.names = NULL)
+    radiologyProtocolConceptId<-data.frame(radiologyOccurrenceId=names(radiologyProtocolConceptId), radiologyProtocolConceptId=radiologyProtocolConceptId, row.names = NULL)
+    return(radiologyProtocolConceptId)
 }

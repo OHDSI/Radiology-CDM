@@ -12,8 +12,8 @@
 #' radiologyImageTable(DICOMList)
 #' @export
 #'
+
 radiologyImageTable<-function(DICOMList){
-    radiologyImageTable<-do.call(rbind,mapply(FUN = cbind,imageId(DICOMList),radiologyOccurrenceId(DICOMList), personId(DICOMList), imageOrientationConceptId(DICOMList), imageType(DICOMList), radiologyPhaseConceptId(DICOMList), imageResolutionRows(DICOMList), imageResolutionColumns(DICOMList), imageSliceThickness(DICOMList), DicomPath(DICOMList), SIMPLIFY = FALSE))
+    radiologyImageTable<-cbind(imageId(DICOMList), radiologyOccurrenceId(DICOMList), personId(DICOMList), imageOrientationConceptId(DICOMList), imageType(DICOMList), radiologyPhaseConceptId(DICOMList), imageResolutionRows(DICOMList), imageResolutionColumns(DICOMList), imageSliceThickness(DICOMList), DicomPath(DICOMList))
     radiologyImageTable<-merge(radiologyImageTable, imageNo(DICOMList), by='imageId', all=T)
     return(radiologyImageTable)}
-

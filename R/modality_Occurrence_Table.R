@@ -17,11 +17,8 @@
 #modality
 modality<-function(DICOMList){
     modality<-lapply(DICOMList, function(x){
-        modalityDf<-x[[1]] %>% filter(name=='Modality') %>% select(value)
-        colnames(modalityDf)<-'modality'
-        return(modalityDf)})
-    modality<-mapply(function(x, y) merge(x, y, all = T), x = radiologyOccurrenceId(DICOMList), y = modality, SIMPLIFY = F)
-    modality<-do.call(rbind, modality)
-    modality<-as.data.frame(modality %>% group_by(radiologyOccurrenceId) %>% distinct(modality))
+        modality<-as.character(x[[1]] %>% filter(name=='Modality') %>% select(value))})
+    modality<-as.data.frame(do.call(rbind, modality))
+    colnames(modality)<-'modality'
     return(modality)
 }

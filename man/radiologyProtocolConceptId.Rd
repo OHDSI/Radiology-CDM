@@ -10,10 +10,10 @@ radiologyProtocolConceptId(DICOMList)
 \item{DICOMList}{you can put it like this and then run the function : DICOMList<-DICOMHeaderList(DICOMFolderPath)}
 }
 \value{
-A dataframe indicating path protocol of each shoot
+A dataframe indicating path protocol&modality of each shoot
 }
 \description{
-radiologyProtocolConceptId function indicates protocol of each shoot
+radiologyProtocolConceptId function indicates protocol&modality of each shoot
 }
 \examples{
 DICOMList<-DICOMHeaderList(DICOMFolderPath)

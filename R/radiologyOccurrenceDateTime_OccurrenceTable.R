@@ -15,22 +15,31 @@
 #' @export
 
 #radiologyOccurrenceDateTime
+
 radiologyOccurrenceDateTime<-function(DICOMList){
     radiologyOccurrenceDateTime<-lapply(DICOMList, function(x){
-        studyDateDf<-x[[1]] %>% filter(name %in% c('StudyDate')) %>% select(value)
-        colnames(studyDateDf)<-'studyDate'
-        studyTimeDf<-x[[1]] %>% filter(name %in% c('StudyTime')) %>% select(value)
-        colnames(studyTimeDf)<-'studyTime'
-        studyDateTimeDf<-merge(studyDateDf, studyTimeDf, all=T)
-        studyDateTimeDf<-studyDateTimeDf %>% mutate(studyDateTime=paste(studyDate,studyTime, sep = ''))
-        studyDateTimeDf<-studyDateTimeDf %>% mutate(studyDateTime=ifelse(is.na(as.POSIXct(studyDateTimeDf$studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC"))==F, as.character(as.POSIXct(studyDateTimeDf$studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC")), as.character(as.POSIXct(studyDateTimeDf$studyDate, format = '%Y%m%d',origin = "1970-01-01",tz ="UTC"))))
-        studyDateTimeDf<-studyDateTimeDf[,c(3)]
-        studyDateTimeDf<-data.frame(studyDateTimeDf)
-        colnames(studyDateTimeDf)<-'studyDateTime'
-        return(studyDateTimeDf)
+        studyDate<-as.character(x[[1]] %>% filter(name %in% c('StudyDate')) %>% select(value))
+        studyTime<-as.character(x[[1]] %>% filter(name %in% c('StudyTime')) %>% select(value))
+        if(studyDate=="character(0)" | studyDate==""){
+            studyDate='NA'
+        }
+        if(studyTime=="character(0)" | studyTime==""){
+            studyTime='NA'
+        }
+        studyDateTime<-paste(studyDate, studyTime, sep = '')
+        studyDateTime<-gsub("NA", '', studyDateTime)
+        studyDateTime<-ifelse(is.na(as.POSIXct(studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC"))==F, as.character(as.POSIXct(studyDateTime, format = '%Y%m%d%H%M%S',origin = "1970-01-01",tz ="UTC")), ifelse(is.na(as.POSIXct(studyDateTime, format = '%Y%m%d',origin = "1970-01-01",tz ="UTC"))==F, as.character(as.POSIXct(studyDate, format = '%Y%m%d',origin = "1970-01-01",tz ="UTC")), 'NA'))
+        return(studyDateTime)
     })
-    radiologyOccurrenceDateTime<-mapply(function(x, y) merge(x, y, all = T), x = radiologyOccurrenceId(DICOMList), y = radiologyOccurrenceDateTime, SIMPLIFY = F)
     radiologyOccurrenceDateTime<-do.call(rbind, radiologyOccurrenceDateTime)
+    radiologyOccurrenceDateTime<-as.data.frame(radiologyOccurrenceDateTime)
+    colnames(radiologyOccurrenceDateTime)<-'studyDateTime'
+    radiologyOccurrenceDateTime<-cbind(radiologyOccurrenceId(DICOMList), radiologyOccurrenceDateTime)
     radiologyOccurrenceDateTime<-as.data.frame(radiologyOccurrenceDateTime %>% group_by(radiologyOccurrenceId) %>% distinct(studyDateTime))
+    radiologyOccurrenceDateTime<-split(radiologyOccurrenceDateTime, radiologyOccurrenceDateTime$radiologyOccurrenceId)
+    radiologyOccurrenceDateTime<-lapply(radiologyOccurrenceDateTime, function(x){
+        as.data.frame(x[c(1),])
+    })
+    radiologyOccurrenceDateTime<-data.frame(do.call(rbind, radiologyOccurrenceDateTime), row.names = NULL)
     return(radiologyOccurrenceDateTime)
 }

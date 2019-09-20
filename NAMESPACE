@@ -2,7 +2,6 @@
 
 export(DICOMHeaderList)
 export(DicomPath)
-export(PersonId)
 export(device)
 export(imageId)
 export(imageNo)

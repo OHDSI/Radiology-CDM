@@ -17,16 +17,19 @@
 #device
 device<-function(DICOMList){
     device<-lapply(DICOMList, function(x){
-        device<-x[[1]] %>% filter(name=='Manufacturer') %>% select(value)
-        colnames(device)<-'Manufacturer'
+        device<-as.character(x[[1]] %>% filter(name=='Manufacturer') %>% select(value))
+        if(device=="character(0)" | device==""){
+            device='NA'
+        }
         return(device)
     })
-    device<-mapply(function(x, y) merge(x, y, all = T), x = radiologyOccurrenceId(DICOMList), y = device, SIMPLIFY = F)
-    device<-do.call(rbind, device)
-    device<-as.data.frame(device %>% group_by(radiologyOccurrenceId) %>% distinct(Manufacturer))
+    device<-as.data.frame(do.call(rbind, device))
+    colnames(device)<-'device'
+    device<-cbind(device, radiologyOccurrenceId(DICOMList))
+    device<-as.data.frame(device %>% group_by(radiologyOccurrenceId) %>% distinct(device))
     device<-split(device, device$radiologyOccurrenceId)
     device<-sapply(device, function(x){
-        paste0(x$Manufacturer, collapse=', ')})
+        paste0(x$device, collapse=', ')})
     device<-data.frame(radiologyOccurrenceId=names(device), manufacturer=device, row.names = NULL)
     return(device)
 }

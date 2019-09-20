@@ -16,6 +16,7 @@
 
 #imageTotalCount
 imageTotalCount<-function(DICOMList){
-    imageTotalCount<-do.call(rbind, radiologyOccurrenceId(DICOMList)) %>% group_by(radiologyOccurrenceId) %>% count(imageTotalCount=n())
+    imageTotalCount<-radiologyOccurrenceId(DICOMList) %>% group_by(radiologyOccurrenceId) %>% count(imageTotalCount=n())
     imageTotalCount[,c(1:2)]
 }
+

@@ -16,9 +16,12 @@
 #' @export
 
 
-imageId<-function(DICOMList){lapply(DICOMList, function(x){
-    imageIdDf<-x[[1]] %>% dplyr::filter(name=='SOPInstanceUID') %>% dplyr::select(value)
-    colnames(imageIdDf)<-'imageId'
-    imageIdDf<-imageIdDf %>% dplyr::mutate(imageId=sapply(imageIdDf$imageId, digest::digest, algo='md5'))
-    return(imageIdDf)
-})}
+imageId<-function(DICOMList){
+    imageIdDf<-lapply(DICOMList, function(x){
+        imageIdDf<-x[[1]] %>% dplyr::filter(name=='SOPInstanceUID') %>% dplyr::select(value)
+        colnames(imageIdDf)<-'imageId'
+        imageIdDf<-imageIdDf %>% dplyr::mutate(imageId=sapply(imageIdDf$imageId, digest::digest, algo='md5'))
+        return(imageIdDf)
+    })
+    return(do.call(rbind, imageIdDf))
+}

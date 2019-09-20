@@ -15,9 +15,14 @@
 #' radiologyOccurrenceId(DICOMList)
 #' @export
 
-radiologyOccurrenceId<-function(DICOMList){lapply(DICOMList, function(x){
-    Radiology_Occurrence_ID_DF<-x[[1]] %>% dplyr::filter(name=='StudyInstanceUID') %>% dplyr::select(value)
-    colnames(Radiology_Occurrence_ID_DF)<-'radiologyOccurrenceId'
-    Radiology_Occurrence_ID_DF<-Radiology_Occurrence_ID_DF %>% dplyr::mutate(radiologyOccurrenceId=sapply(Radiology_Occurrence_ID_DF$radiologyOccurrenceId, digest, algo='md5'))
-    return(Radiology_Occurrence_ID_DF)
-})}
+radiologyOccurrenceId<-function(DICOMList){
+    radiologyOccurrenceId<-lapply(DICOMList, function(x){
+        Radiology_Occurrence_ID_DF<-x[[1]] %>% dplyr::filter(name=='StudyInstanceUID') %>% dplyr::select(value)
+        Radiology_Occurrence_ID_DF<-data.frame(Radiology_Occurrence_ID_DF[c(1),], row.names = NULL)
+        colnames(Radiology_Occurrence_ID_DF)='radiologyOccurrenceId'
+        Radiology_Occurrence_ID_DF<-Radiology_Occurrence_ID_DF %>% dplyr::mutate(radiologyOccurrenceId=sapply(Radiology_Occurrence_ID_DF$radiologyOccurrenceId, digest, algo='md5'))
+        return(Radiology_Occurrence_ID_DF)})
+    radiologyOccurrenceId<-as.data.frame(do.call(rbind,radiologyOccurrenceId))
+    colnames(radiologyOccurrenceId)='radiologyOccurrenceId'
+    return(radiologyOccurrenceId)
+}

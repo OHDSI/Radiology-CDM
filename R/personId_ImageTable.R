@@ -15,8 +15,11 @@
 #' personId(DICOMList)
 #' @export
 
-personId<-function(DICOMList){lapply(DICOMList, function(x){
-    personIdDf<-x[[1]] %>% dplyr::filter(name=='PatientID') %>% dplyr::select(value)
-    colnames(personIdDf)<-'personId'
-    return(personIdDf)
-})}
+personId<-function(DICOMList){
+    personId<-lapply(DICOMList, function(x){
+        personId<-x[[1]] %>% dplyr::filter(name=='PatientID') %>% dplyr::select(value)
+        colnames(personId)<-'personId'
+        return(personId)
+    })
+    return(do.call(rbind, personId))
+}

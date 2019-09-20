@@ -16,8 +16,7 @@
 
 #radiologyDirpath
 radiologyDirpath<-function(DICOMList){
-    radiologyDirpath<-mapply(function(x, y) merge(x, y, all = T), x = radiologyOccurrenceId(DICOMList), y = DicomPath(DICOMList), SIMPLIFY = F)
-    radiologyDirpath<-do.call(rbind, radiologyDirpath)
+    radiologyDirpath<-cbind(DicomPath(DICOMList), radiologyOccurrenceId(DICOMList))
     radiologyDirpath<-split(radiologyDirpath, radiologyDirpath$radiologyOccurrenceId)
     radiologyDirpath<-sapply(radiologyDirpath, function(x){
         Radiology_Dirpath<-strsplit(as.character(x$Dicompath), '/')

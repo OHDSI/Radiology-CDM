@@ -15,27 +15,62 @@
 #' @export
 
 radiologyPhaseConceptId<-function(DICOMList){
-    contastBolusAgentList<-lapply(DICOMList, function(x){
-        contastBolusAgentDf<-x[[1]] %>% dplyr::filter(name %in% c('ContrastBolusAgent')) %>% dplyr::select(value)
-        colnames(contastBolusAgentDf)<-'contastBolusAgent'
-        return(contastBolusAgentDf)})
-    imageTypeDfList<-imageType(DICOMList)
-    radiologyPhaseConceptIdDf <- mapply(function(x, y) merge(x, y, by=0, all = T), x = contastBolusAgentList, y = imageTypeDfList, SIMPLIFY = F)
-    radiologyPhaseConceptIdDf<-lapply(radiologyPhaseConceptIdDf, function(x){
-        if(grepl('localizer', tolower(x$imageType))==T){
-            return('28664')} else if(grepl('secondary', tolower(x$imageType))==T){
-                return('5901')} else if(grepl('primary', tolower(x$imageType))==T & is.na(x$contastBolusAgent)==T){
-                    return('28833')
-                } else if(grepl('primary', tolower(x$imageType))==T & is.na(x$contastBolusAgent)==F) {
-                    return('28694')
-                } else {
-                    return('others')
-                }
+    contastBolusAgent<-lapply(DICOMList, function(x){
+        contastBolusAgent<-as.character(x[[1]] %>% dplyr::filter(name %in% c('ContrastBolusAgent')) %>% dplyr::select(value))
+        if(contastBolusAgent=="character(0)" | contastBolusAgent==""){
+            contastBolusAgent='NA'
+        } else {
+            contastBolusAgent='haveValue'
+        }
+        contastBolusAgent<-as.data.frame(contastBolusAgent)
+        colnames(contastBolusAgent)<-'contastBolusAgent'
+        return(contastBolusAgent)})
+    contastBolusAgent<-do.call(rbind,contastBolusAgent)
+
+    seriesDescription<-lapply(DICOMList, function(x){
+        seriesDescription<-as.character(x[[1]] %>% dplyr::filter(name %in% c('SeriesDescription')) %>% dplyr::select(value))
+        if(seriesDescription=="character(0)" | seriesDescription==""){
+            seriesDescription='NA'
+        }
+        seriesDescription<-as.data.frame(seriesDescription)
+        colnames(seriesDescription)<-'seriesDescription'
+        return(seriesDescription)})
+    seriesDescription<-do.call(rbind,seriesDescription)
+
+    information<-cbind(modality(DICOMList), imageType(DICOMList), contastBolusAgent, seriesDescription)
+    information<-split(information, seq(nrow(information)))
+    radiologyPhaseConceptId<-sapply(information, function(x){
+        if(grepl('CT', x$modality)==F & grepl('MR', x$modality)==F){
+            return('NA')
+        }
+        else if(grepl('Localizer', x$imageType)==T){
+            return('28664')
+        }
+        else if(grepl('SECONDARY', x$imageType)==T){
+            return('5901')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('pre', tolower(x$seriesDescription))==T){
+            return('28833')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('arterial', tolower(x$seriesDescription))==T){
+            return('11080')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('portal', tolower(x$seriesDescription))==T){
+            return('11085')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('delay', tolower(x$seriesDescription))==T){
+            return('11081')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('NA', x$contastBolusAgent)==T){
+            return('28833')
+        }
+        else if(grepl('PRIMARY', x$imageType)==T & grepl('haveValue', x$contastBolusAgent)==T){
+            return('28694')
+        }
+        else {
+            return('others')
+        }
     })
-    radiologyPhaseConceptIdDf<-lapply(radiologyPhaseConceptIdDf, function(x){
-        radiologyPhaseConceptIdDf<-as.data.frame(x)
-        colnames(radiologyPhaseConceptIdDf)<-'radiologyPhaseConceptId'
-        return(radiologyPhaseConceptIdDf)
-    })
-    return(radiologyPhaseConceptIdDf)
+    radiologyPhaseConceptId<-data.frame(radiologyPhaseConceptId, row.names = NULL)
+    return(radiologyPhaseConceptId)
 }

@@ -16,19 +16,12 @@
 
 imageSliceThickness<-function(DICOMList){
     imageSliceThickness<-lapply(DICOMList, function(x){
-        imageSliceThicknessDf<-x[[1]] %>% dplyr::filter(name =='SliceThickness') %>% dplyr::select(value)
-        modalityDf<-x[[1]] %>% dplyr::filter(name =='Modality') %>% dplyr::select(value)
-        imageSliceThicknessDf<-rbind(modalityDf,imageSliceThicknessDf)
-        imageSliceThicknessDf<-if(grepl('CT', imageSliceThicknessDf[1,])==F){
-            return(NA)
-        } else {
-            return(imageSliceThicknessDf[2,])
+        imageSliceThickness<-as.character(x[[1]] %>% dplyr::filter(name =='SliceThickness') %>% dplyr::select(value))
+        if(imageSliceThickness=="character(0)" | imageSliceThickness==""){
+            imageSliceThickness='NA'
         }
-        return(imageSliceThicknessDf)
-    })
-    imageSliceThicknessDf<-lapply(imageSliceThickness, function(x){
-        imageSliceThicknessDf<-as.data.frame(x)
-        colnames(imageSliceThicknessDf)<-'imageSliceThickness'
-        return(imageSliceThicknessDf)
-    })
-    return(imageSliceThicknessDf)}
+        return(imageSliceThickness)})
+    imageSliceThickness<-as.data.frame(do.call(rbind, imageSliceThickness))
+    colnames(imageSliceThickness)<-'imageSliceThickness'
+    return(imageSliceThickness)
+}
