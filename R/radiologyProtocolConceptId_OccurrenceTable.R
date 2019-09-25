@@ -26,7 +26,7 @@ radiologyProtocolConceptId<-function(DICOMList){
         colnames(protocolName)<-'protocolName'
         return(protocolName)})
     protocolName<-do.call(rbind,protocolName)
-    information<-cbind(anatomicRegion(DICOMList), radiologyOccurrenceId(DICOMList), modality(DICOMList), radiologyPhaseConceptId(DICOMList), imageOrientationConceptId(DICOMList), protocolName)
+    information<-cbind(anatomicRegion(DICOMList), radiologyOccurrenceId(DICOMList), modalityImage(DICOMList), radiologyPhaseConceptId(DICOMList), imageOrientationConceptId(DICOMList), protocolName)
     information<-unique(information)
     information<-split(information, information$radiologyOccurrenceId)
     information<-lapply(information, function(x){

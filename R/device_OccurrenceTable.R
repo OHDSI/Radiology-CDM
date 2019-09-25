@@ -18,7 +18,7 @@
 device<-function(DICOMList){
     device<-lapply(DICOMList, function(x){
         device<-as.character(x[[1]] %>% filter(name=='Manufacturer') %>% select(value))
-        if(device=="character(0)" | device==""){
+        if(device=="character(0)" | device=="" |device=="integer(0)"){
             device='NA'
         }
         return(device)

@@ -17,9 +17,12 @@
 
 personId<-function(DICOMList){
     personId<-lapply(DICOMList, function(x){
-        personId<-x[[1]] %>% dplyr::filter(name=='PatientID') %>% dplyr::select(value)
-        colnames(personId)<-'personId'
-        return(personId)
-    })
-    return(do.call(rbind, personId))
+        personId<-as.character(x[[1]] %>% filter(name=='PatientID') %>% select(value))
+        if(personId=="character(0)" | personId=="" | personId=="integer(0)"){
+            personId='NA'
+        }
+        return(personId)})
+    personId<-as.data.frame(do.call(rbind, personId))
+    colnames(personId)<-'personId'
+    return(personId)
 }

@@ -17,11 +17,14 @@
 
 
 imageId<-function(DICOMList){
-    imageIdDf<-lapply(DICOMList, function(x){
-        imageIdDf<-x[[1]] %>% dplyr::filter(name=='SOPInstanceUID') %>% dplyr::select(value)
-        colnames(imageIdDf)<-'imageId'
-        imageIdDf<-imageIdDf %>% dplyr::mutate(imageId=sapply(imageIdDf$imageId, digest::digest, algo='md5'))
-        return(imageIdDf)
+    imageId<-lapply(DICOMList, function(x){
+        imageId<-as.character(x[[1]] %>% dplyr::filter(name=='SOPInstanceUID') %>% dplyr::select(value))
+        if(imageId=="character(0)" | imageId=="" | imageId=="integer(0)"){
+            imageId='NA'
+        }
+        return(imageId)
     })
-    return(do.call(rbind, imageIdDf))
+    imageId<-as.data.frame(do.call(rbind, imageId))
+    colnames(imageId)<-'imageId'
+    return(imageId)
 }

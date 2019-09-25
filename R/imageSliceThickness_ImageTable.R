@@ -17,7 +17,7 @@
 imageSliceThickness<-function(DICOMList){
     imageSliceThickness<-lapply(DICOMList, function(x){
         imageSliceThickness<-as.character(x[[1]] %>% dplyr::filter(name =='SliceThickness') %>% dplyr::select(value))
-        if(imageSliceThickness=="character(0)" | imageSliceThickness==""){
+        if(imageSliceThickness=="character(0)" | imageSliceThickness=="" | imageSliceThickness=="integer(0)"){
             imageSliceThickness='NA'
         }
         return(imageSliceThickness)})

@@ -21,3 +21,4 @@ imageNo<-function(DICOMList){
     imageNo<-imageNo[, c(1, 4, 5)]
     return(imageNo)
 }
+

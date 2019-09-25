@@ -14,6 +14,6 @@
 #'
 
 radiologyImageTable<-function(DICOMList){
-    radiologyImageTable<-cbind(imageId(DICOMList), radiologyOccurrenceId(DICOMList), personId(DICOMList), imageOrientationConceptId(DICOMList), imageType(DICOMList), radiologyPhaseConceptId(DICOMList), imageResolutionRows(DICOMList), imageResolutionColumns(DICOMList), imageSliceThickness(DICOMList), DicomPath(DICOMList))
+    radiologyImageTable<-cbind(imageId(DICOMList), radiologyOccurrenceId(DICOMList), personId(DICOMList), imageOrientationConceptId(DICOMList), imageType(DICOMList), radiologyPhaseConceptId(DICOMList), imageResolutionRows(DICOMList), imageResolutionColumns(DICOMList), imageSliceThickness(DICOMList), dicomPath(DICOMList))
     radiologyImageTable<-merge(radiologyImageTable, imageNo(DICOMList), by='imageId', all=T)
     return(radiologyImageTable)}

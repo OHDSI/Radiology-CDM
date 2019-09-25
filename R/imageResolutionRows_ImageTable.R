@@ -16,9 +16,14 @@
 
 imageResolutionRows<-function(DICOMList){
     imageResolutionRows<-lapply(DICOMList, function(x){
-        imageResolutionRowsDf<-x[[1]] %>% dplyr::filter(name=='Rows') %>% dplyr::select(value)
-        colnames(imageResolutionRowsDf)<-'imageResolutionRows'
-        return(imageResolutionRowsDf)
+        imageResolutionRows<-as.character(x[[1]] %>% dplyr::filter(name=='Rows') %>% dplyr::select(value))
+        if(imageResolutionRows=="character(0)" | imageResolutionRows=="" | imageResolutionRows=="integer(0)"){
+            imageResolutionRows='NA'
+        }
+        return(imageResolutionRows)
     })
-    return(do.call(rbind, imageResolutionRows))
+    imageResolutionRows<-as.data.frame(do.call(rbind, imageResolutionRows))
+    colnames(imageResolutionRows)<-'imageResolutionRows'
+    return(imageResolutionRows)
 }
+

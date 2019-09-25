@@ -21,9 +21,17 @@ modality<-function(DICOMList){
         if(modality=="CR" | modality=="DX"){
             modality='XR'
         }
+        else if(modality=="character(0)" | modality=="" | modality=="integer(0)"){
+            modality='NA'
+        }
         return(modality)})
     modality<-as.data.frame(do.call(rbind, modality))
     colnames(modality)<-'modality'
+    modality<-cbind(modality, radiologyOccurrenceId(DICOMList))
+    modality<-as.data.frame(modality %>% group_by(radiologyOccurrenceId) %>% distinct(modality))
+    modality<-split(modality, modality$radiologyOccurrenceId)
+    modality<-sapply(modality, function(x){
+        paste0(x$modality, collapse=', ')})
+    modality<-data.frame(radiologyOccurrenceId=names(modality), modality=modality, row.names = NULL)
     return(modality)
 }
-

@@ -16,10 +16,10 @@
 
 #radiologyDirpath
 radiologyDirpath<-function(DICOMList){
-    radiologyDirpath<-cbind(DicomPath(DICOMList), radiologyOccurrenceId(DICOMList))
+    radiologyDirpath<-cbind(dicomPath(DICOMList), radiologyOccurrenceId(DICOMList))
     radiologyDirpath<-split(radiologyDirpath, radiologyDirpath$radiologyOccurrenceId)
     radiologyDirpath<-sapply(radiologyDirpath, function(x){
-        Radiology_Dirpath<-strsplit(as.character(x$Dicompath), '/')
+        Radiology_Dirpath<-strsplit(as.character(x$dicomPath), '/')
         Radiology_Dirpath<-Reduce(intersect, Radiology_Dirpath)
         Radiology_Dirpath<-paste(Radiology_Dirpath, collapse='/')
         return(Radiology_Dirpath)

@@ -1,3 +1,19 @@
+#' 'anatomicRegion'
+#'
+#' anatomicRegion function represents anatomic region of each shoot
+#'
+#'
+#' @param DICOMList you can put it like this and then run the function : DICOMList<-anatomicRegion(DICOMFolderPath)
+#' @import dplyr
+#' @importFrom magrittr "%>%"
+#'
+#'
+#' @return A dataframe representing anatomic region of each shoot
+#' @examples
+#' DICOMList<-DICOMHeaderList(DICOMFolderPath)
+#' anatomicRegion(DICOMList)
+#' @export
+
 anatomicRegion<-function(DICOMList){
     anatomicRegion<-lapply(DICOMList, function(x){
         anatomicRegion<-x[[1]]%>%filter(name %in% c('BodyPartExamined', 'StudyDescription', 'SeriesDescription')) %>% select(value)
@@ -29,3 +45,4 @@ anatomicRegion<-function(DICOMList){
     anatomicRegion<-do.call(rbind, anatomicRegion)
     return(anatomicRegion)
 }
+

@@ -37,7 +37,7 @@ radiologyPhaseConceptId<-function(DICOMList){
         return(seriesDescription)})
     seriesDescription<-do.call(rbind,seriesDescription)
 
-    information<-cbind(modality(DICOMList), imageType(DICOMList), contastBolusAgent, seriesDescription)
+    information<-cbind(modalityImage(DICOMList), imageType(DICOMList), contastBolusAgent, seriesDescription)
     information<-split(information, seq(nrow(information)))
     radiologyPhaseConceptId<-sapply(information, function(x){
         if(grepl('CT', x$modality)==F & grepl('MR', x$modality)==F){

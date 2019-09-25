@@ -14,10 +14,16 @@
 #' lapply(DICOMList)
 #' @export
 
-DicomPath<-function(DICOMList){
-    DicomPath<-lapply(DICOMList, function(x){
-        data.frame(Dicompath=names(x))
+dicomPath<-function(DICOMList){
+    dicomPath<-lapply(DICOMList, function(x){
+        dicomPath<-names(x)
+        if(is.null(dicomPath)==T){
+            return('NA')
+        }
+        return(dicomPath)
     })
-    return(do.call(rbind,DicomPath))
+    dicomPath<-as.data.frame(do.call(rbind, dicomPath))
+    colnames(dicomPath)<-'dicomPath'
+    return(dicomPath)
 }
 

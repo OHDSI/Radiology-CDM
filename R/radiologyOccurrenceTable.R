@@ -16,11 +16,13 @@
 
 radiologyOccurrenceTable<-function(DICOMList){
     radiologyOccurrenceTable<-merge(radiologyOccurrenceDateTime(DICOMList), device(DICOMList), by='radiologyOccurrenceId', all=T)
+    radiologyOccurrenceTable<-merge(radiologyOccurrenceDateTime(DICOMList), modality(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiologyProtocolConceptId(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, imageTotalCount(DICOMList), by='radiologyOccurrenceId', all=T)
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, radiologyDirpath(DICOMList), by='radiologyOccurrenceId', all=T)
-    elsetable<-cbind(anatomicRegion(DICOMList), personId(DICOMList), modality(DICOMList), radiologyOccurrenceId(DICOMList))
+    elsetable<-cbind(anatomicRegion(DICOMList), personId(DICOMList), radiologyOccurrenceId(DICOMList))
+    radiologyOccurrenceTable<-radiologyOccurrenceTable[!(radiologyOccurrenceTable$radiologyOccurrenceId=='NA'),]
+    elsetable<-elsetable[!(elsetable$radiologyOccurrenceId=='NA'),]
     radiologyOccurrenceTable<-merge(radiologyOccurrenceTable, unique(elsetable), by='radiologyOccurrenceId', all=T)
     return(radiologyOccurrenceTable)
 }
-
