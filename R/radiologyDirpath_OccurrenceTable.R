@@ -21,6 +21,9 @@ radiologyDirpath<-function(DICOMList){
     radiologyDirpath<-sapply(radiologyDirpath, function(x){
         Radiology_Dirpath<-strsplit(as.character(x$dicomPath), '/')
         Radiology_Dirpath<-Reduce(intersect, Radiology_Dirpath)
+        if(grepl(Radiology_Dirpath[length(Radiology_Dirpath)], '.dcm')==T){
+            Radiology_Dirpath<-Radiology_Dirpath[-length(Radiology_Dirpath)]
+        }
         Radiology_Dirpath<-paste(Radiology_Dirpath, collapse='/')
         return(Radiology_Dirpath)
     })
