@@ -162,6 +162,8 @@ RCDMShinyViewer<-function(Radiology_Occurrence_Table, Radiology_Image_Table){
             }
         })
         output$txt <-renderText({
+            RadiologyPlaybook<-unique(LoincRsnaRadiologyPlaybook[,c(2,3)])
+            RadiologyPlaybook<-data.frame(RadiologyPlaybook, row.names = NULL)
             answer1<-Radiology_Image_Table[, c('radiologyOccurrenceId', 'radiologyPhaseConceptId', 'dicomPath')]
             answer1<-answer1 %>% filter(radiologyOccurrenceId %in% Radiology_Occurrence_Table$radiologyOccurrenceId)
             answer2<-RadiologyPlaybook %>% filter(radiologyProtocolConceptId %in% Radiology_Occurrence_Table$radiologyProtocolConceptId)
@@ -176,6 +178,8 @@ RCDMShinyViewer<-function(Radiology_Occurrence_Table, Radiology_Image_Table){
                 paste('List_of_DICOM_files.csv')
             },
             content = function(file) {
+                RadiologyPlaybook<-unique(LoincRsnaRadiologyPlaybook[,c(2,3)])
+                RadiologyPlaybook<-data.frame(RadiologyPlaybook, row.names = NULL)
                 answer1<-Radiology_Image_Table[, c('radiologyOccurrenceId', 'radiologyPhaseConceptId', 'dicomPath')]
                 answer1<-answer1 %>% filter(radiologyOccurrenceId %in% Radiology_Occurrence_Table$radiologyOccurrenceId)
                 answer2<-RadiologyPlaybook %>% filter(radiologyProtocolConceptId %in% Radiology_Occurrence_Table$radiologyProtocolConceptId)
