@@ -1,0 +1,12 @@
+Package: RadiologyCDM
+Type: Package
+Title: Standardizing header metadata of DICOM files from various institutions
+Version: 0.1.0
+Author: "Chul Hyoung Park", "Developer", role = c("aut", "cre"), email = "hihipch@gmail.com"
+Maintainer: Dr.Chul Hyoung Park <hihipch@gmail.com>
+Description: Every DICOM files contain header metadata. And the terminology used in the metadata is different between institutions and countries. Therefore we have to standardize the sturcture and terminology of metadata to use DICOM files as a big data. 
+License: Apache License 2.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Imports: ParallelLogger, digest, dplyr, magrittr, oro.dicom
