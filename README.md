@@ -7,9 +7,7 @@
 
 ## Overview
 
-Metadata extraction module of DICOM image format.
-
-The main functions include the Pre and Post identification algorithms of CT and the ability to load them into the DBMS.
+Metadata extraction module of DICOM images.
 
 
 
@@ -17,22 +15,27 @@ The main functions include the Pre and Post identification algorithms of CT and 
 
 ![RCDM-ETL_Process](images/RCDM-ETL_Process.png)
 
-Radiology-CDM extracts Metadata and Pixeldata from DICOM file, which is the original radiology image, and combines the data required for RCDM and stores it in DB format and converts it into CDM. 
+- Radiology-CDM extracts Metadata and Pixeldata from DICOM file, which is the original radiology image, and combines the data required for RCDM and stores it in DB format and converts it into CDM.
 
+- Just copy and paste this code into your Rstudio!<br> All you have to do is just change 'path' and 'core' in DICOMHeaderList function.<br>RadiologyCDM function will read all of the DICOM files under the 'path' you've specified. <br>Now check the variable 'Radiology_Image_Table' and, 'Radiology_Occurrence_Table'!
 
-
-## Extraction sequence
-
-See the [wiki](https://github.com/OHDSI/Radiology-CDM/wiki/How-to-extract) for details on ETL methods.
-
-
-
-
-## Example / Documentation
-
-Documents and examples in the RadETL package can be loaded into the class and function names you want to provide the document using the question mark keyword after package installation.
+- If you want to observe result of database analysis, you can use RCDMShinyViewer function.<br> All you have to do is to download 'LoincRsnaRadiologyPlaybook.csv' file which is uploaded on this github page.<br> This file is a mapping table for radiolgy terminologies.
 
 ```R
-?DBMSIO
-```
 
+devtools::install_github('ABMI/Radiology-CDM')
+library(RadiologyCDM)
+library(dplyr)
+library(ParallelLogger)
+library(digest)
+library(shiny)
+library(ggplot2)
+library(DT)
+
+#Please don't change the name of variables : 'DICOMList', 'Radiology_Occurrence_Table', 'Radiology_Image_Table', 'LoincRsnaRadiologyPlaybook'
+DICOMList<-DICOMHeaderList('path to DICOM files', core = 4)
+Radiology_Occurrence_Table<-radiologyOccurrenceTable(DICOMList)
+Radiology_Image_Table<-radiologyImageTable(DICOMList)
+LoincRsnaRadiologyPlaybook<-read.csv('LoincRsnaRadiologyPlaybook.csv')
+RCDMShinyViewer(Radiology_Occurrence_Table, Radiology_Image_Table)
+```
