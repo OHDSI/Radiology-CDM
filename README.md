@@ -7,9 +7,7 @@
 
 ## Overview
 
-Metadata extraction module of DICOM image format.
-
-The main functions include the Pre and Post identification algorithms of CT and the ability to load them into the DBMS.
+Metadata extraction module of DICOM images.
 
 
 
