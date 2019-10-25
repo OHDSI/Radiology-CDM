@@ -32,10 +32,10 @@ library(shiny)
 library(ggplot2)
 library(DT)
 
-
-DICOMList<-DICOMHeaderList('path to DICOM files', core = 4) #Please don't change the name of variable : 'DICOMList'
-Radiology_Occurrence_Table<-radiologyOccurrenceTable(DICOMList) #Please don't change the name of variable : 'Radiology_Occurrence_Table'
-Radiology_Image_Table<-radiologyImageTable(DICOMList) #Please don't change the name of variable : 'Radiology_Image_Table'
-LoincRsnaRadiologyPlaybook<-read.csv('LoincRsnaRadiologyPlaybook.csv') #Please don't change the name of variable : 'LoincRsnaRadiologyPlaybook'
+#Please don't change the name of variables : 'DICOMList', 'Radiology_Occurrence_Table', 'Radiology_Image_Table', 'LoincRsnaRadiologyPlaybook'
+DICOMList<-DICOMHeaderList('path to DICOM files', core = 4)
+Radiology_Occurrence_Table<-radiologyOccurrenceTable(DICOMList)
+Radiology_Image_Table<-radiologyImageTable(DICOMList)
+LoincRsnaRadiologyPlaybook<-read.csv('LoincRsnaRadiologyPlaybook.csv')
 RCDMShinyViewer(Radiology_Occurrence_Table, Radiology_Image_Table)
 ```
