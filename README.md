@@ -23,7 +23,7 @@ Metadata extraction module of DICOM images.
 
 ```R
 
-devtools::install_github('ABMI/Radiology-CDM/RadETL')
+devtools::install_github('OHDSI/Radiology-CDM/RadETL')
 library(RadiologyCDM)
 library(dplyr)
 library(ParallelLogger)
